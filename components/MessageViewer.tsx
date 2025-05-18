@@ -525,7 +525,7 @@ export default function MessageViewer() {
         ref={setMessageListRef}
         sx={{ 
           flexGrow: 1,
-          minHeight: '700px', 
+          maxHeight: '700px',
           overflowY: 'auto', 
           border: '1px solid rgba(255, 255, 255, 0.12)', 
           borderRadius: 1,

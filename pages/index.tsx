@@ -29,7 +29,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         <AppBar position="static" color="primary" elevation={0}>
           <Toolbar>
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
@@ -38,13 +38,12 @@ export default function Home() {
           </Toolbar>
         </AppBar>
 
-        <Box sx={{ flexGrow: 1, overflow: 'hidden' }}>
-          <Container maxWidth="xl" sx={{ height: '100%', py: 2 }}>
+        <Box sx={{ flexGrow: 1, overflow: 'visible' }}>
+          <Container maxWidth="xl" sx={{ py: 2 }}>
             <Box sx={{ 
               display: 'flex', 
               flexDirection: { xs: 'column', md: 'row' }, 
-              gap: 2, 
-              height: '100%'
+              gap: 2
             }}>
               <Box sx={{ flex: 1, maxWidth: { md: '450px' } }}>
                 <Stack spacing={2}>
