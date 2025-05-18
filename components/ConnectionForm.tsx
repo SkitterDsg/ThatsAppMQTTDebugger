@@ -63,7 +63,7 @@ export default function ConnectionForm() {
       transition: {
         duration: 1.5,
         repeat: Infinity,
-        repeatType: "loop",
+        repeatType: "loop" as const,
         times: [0, 0.7, 1]
       }
     }
@@ -196,8 +196,11 @@ export default function ConnectionForm() {
               gap: 1
             }}>
               <motion.div 
-                animate={isConnected ? ["connected", "pulse"] : "disconnected"}
+                animate={isConnected ? "connected" : "disconnected"}
                 variants={statusVariants}
+                {...(isConnected && { 
+                  animate: ["connected", "pulse"],
+                })}
                 style={{ 
                   width: 10, 
                   height: 10, 

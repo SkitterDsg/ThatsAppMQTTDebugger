@@ -10,14 +10,11 @@ import {
   Chip,
   TextField,
   IconButton,
-  Collapse,
   FormControlLabel,
   Switch,
   Tooltip,
-  Avatar,
-  Fade
+  Avatar
 } from '@mui/material';
-import { keyframes } from '@mui/system';
 import { motion, AnimatePresence } from 'framer-motion';
 import ClearIcon from '@mui/icons-material/Clear';
 import FilterListIcon from '@mui/icons-material/FilterList';
@@ -313,36 +310,6 @@ const MessageContent = ({ message }: { message: string }) => {
 
 // Define animations
 
-const glowHighlight = keyframes`
-  0% {
-    background-color: rgba(57, 73, 171, 0);
-    border-left-color: rgba(57, 73, 171, 0);
-  }
-  20% {
-    background-color: rgba(57, 73, 171, 0.05);
-    border-left-color: rgba(57, 73, 171, 0.4);
-  }
-  80% {
-    background-color: rgba(57, 73, 171, 0.02);
-    border-left-color: rgba(57, 73, 171, 0.2);
-  }
-  100% {
-    background-color: rgba(0, 0, 0, 0);
-    border-left-color: rgba(0, 0, 0, 0);
-  }
-`;
-
-const slideIn = keyframes`
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-`;
-
 export default function MessageViewer() {
   const { messages, clearMessages } = useMQTT();
   const [filter, setFilter] = useState('');
@@ -421,8 +388,10 @@ export default function MessageViewer() {
     const newMessages = currentMessageIds.filter(id => !messagesIdsRef.current.includes(id));
     
     if (newMessages.length > 0) {
-      // Performance optimization: only animate up to 5 newest messages if there are many
-      const messagesToAnimate = newMessages.length > 5 ? newMessages.slice(0, 5) : newMessages;
+      // Performance optimization: only animate up to 3 newest messages if there are many
+      // for very high volumes (>10), disable animations completely to prevent visual chaos
+      const messagesToAnimate = newMessages.length > 10 ? [] : 
+                               newMessages.length > 3 ? newMessages.slice(0, 3) : newMessages;
       
       // Add the new messages to animatedMessageIds
       setAnimatedMessageIds(prev => {
@@ -450,7 +419,7 @@ export default function MessageViewer() {
             updated.delete(id);
             return updated;
           });
-        }, 1600);
+        }, 800);
       });
     } else {
       // Update the reference if no new messages
@@ -630,27 +599,28 @@ export default function MessageViewer() {
     visible: {
       opacity: 1,
       transition: { 
-        staggerChildren: 0.05,
-        when: "beforeChildren"
+        staggerChildren: 0.02,
+        when: "beforeChildren",
+        duration: 0.1
       }
     }
   };
 
   const messageVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 10 },
     visible: { 
       opacity: 1, 
       y: 0,
       transition: { 
-        type: "spring", 
-        damping: 20, 
-        stiffness: 300 
+        type: "tween", 
+        duration: 0.2,
+        ease: "easeOut"
       }
     },
     exit: { 
       opacity: 0, 
-      x: -20, 
-      transition: { duration: 0.2 } 
+      scale: 0.98,
+      transition: { duration: 0.1 } 
     }
   };
   
@@ -661,12 +631,12 @@ export default function MessageViewer() {
       backgroundColor: 'rgba(57, 73, 171, 0)'
     },
     animate: {
-      borderLeft: ['3px solid rgba(57, 73, 171, 0.6)', '3px solid rgba(57, 73, 171, 0.4)', '3px solid rgba(57, 73, 171, 0)'],
-      backgroundColor: ['rgba(57, 73, 171, 0.05)', 'rgba(57, 73, 171, 0.02)', 'rgba(57, 73, 171, 0)'],
+      borderLeft: ['3px solid rgba(57, 73, 171, 0.4)', '3px solid rgba(57, 73, 171, 0)'],
+      backgroundColor: ['rgba(57, 73, 171, 0.03)', 'rgba(57, 73, 171, 0)'],
       transition: {
-        duration: 1.6,
-        times: [0, 0.4, 1],
-        ease: "easeInOut"
+        duration: 0.8,
+        times: [0, 1],
+        ease: "easeOut"
       }
     }
   };
@@ -946,7 +916,7 @@ export default function MessageViewer() {
                 overflow: 'hidden'
               }}
             >
-              <AnimatePresence initial={false}>
+              <AnimatePresence initial={false} mode="popLayout">
                 {filteredMessages.map((msg, idx) => {
                   const messageId = getMessageId(msg, idx);
                   const isNewMessage = animatedMessageIds.has(messageId);
@@ -957,7 +927,7 @@ export default function MessageViewer() {
                       initial="hidden"
                       animate="visible"
                       exit="exit"
-                      layout
+                      layout="position"
                       style={{ overflow: 'hidden', width: '100%' }}
                     >
                       {idx > 0 && <Divider />}

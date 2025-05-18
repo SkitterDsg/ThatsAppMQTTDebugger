@@ -200,7 +200,8 @@ export default function MessagePublisher() {
             />
           </motion.div>
           
-          <motion.div 
+          <Box
+            component={motion.div}
             variants={itemVariants}
             sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
           >
@@ -238,7 +239,7 @@ export default function MessagePublisher() {
                 sx={{ my: 0 }}
               />
             </Stack>
-          </motion.div>
+          </Box>
 
           <AnimatePresence>
             {isJsonMessage && (
