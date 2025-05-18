@@ -31,30 +31,52 @@ export default function Home() {
       </Head>
 
       <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        <AppBar position="static" color="primary" elevation={0}>
-          <Toolbar>
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              ThatsApp MQTT Debugger
-            </Typography>
+        <AppBar position="static" elevation={1}>
+          <Toolbar sx={{ px: { xs: 2, sm: 3 } }}>
+            <Box sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 1.5, 
+              flexGrow: 1 
+            }}>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L4 5V11.09C4 16.14 7.41 20.85 12 22C16.59 20.85 20 16.14 20 11.09V5L12 2Z" fill="#EC407A" opacity="0.6" />
+                <path d="M12 6L7 8V12C7 14.8 9.13 17.67 12 18.5C14.87 17.67 17 14.8 17 12V8L12 6Z" fill="#EC407A" />
+                <path d="M11.5 14.5V11L9 9.5L9.5 12L11.5 14.5Z" fill="white" />
+                <path d="M12.5 14.5V11L15 9.5L14.5 12L12.5 14.5Z" fill="white" />
+              </svg>
+              <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
+                ThatsApp MQTT Debugger
+              </Typography>
+            </Box>
             <MessageTypesGuide />
           </Toolbar>
         </AppBar>
 
         <Box sx={{ flexGrow: 1, overflow: 'visible' }}>
-          <Container maxWidth="xl" sx={{ py: 2 }}>
+          <Container maxWidth="xl" sx={{ py: 3 }}>
             <Box sx={{ 
               display: 'flex', 
               flexDirection: { xs: 'column', md: 'row' }, 
-              gap: 2
+              gap: 3
             }}>
-              <Box sx={{ flex: 1, maxWidth: { md: '450px' } }}>
-                <Stack spacing={2}>
+              <Box sx={{ 
+                flex: 1, 
+                maxWidth: { md: '450px' },
+                transition: 'all 0.3s ease'
+              }}>
+                <Stack spacing={3}>
                   <ConnectionForm />
                   <TopicSubscriber />
                   <MessagePublisher />
                 </Stack>
               </Box>
-              <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <Box sx={{ 
+                flex: 1.5, 
+                display: 'flex', 
+                flexDirection: 'column',
+                transition: 'all 0.3s ease' 
+              }}>
                 <MessageViewer />
               </Box>
             </Box>
@@ -64,23 +86,53 @@ export default function Home() {
         <Box 
           component="footer" 
           sx={{ 
-            py: 1, 
-            borderTop: '1px solid rgba(255, 255, 255, 0.12)',
-            bgcolor: 'background.paper'
+            py: 1.5, 
+            mt: 3,
+            borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+            backdropFilter: 'blur(10px)',
+            bgcolor: 'rgba(30, 30, 30, 0.8)'
           }}
         >
-          <Typography variant="body2" color="text.secondary" align="center">
-            {'Made with ❤️ by Doruk for FHNW EMOBA module'}{' — '}
-            <Link 
-              href="https://github.com/peaktwilight/ThatsAppMQTTDebugger" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              color="inherit"
-              underline="hover"
+          <Container maxWidth="xl">
+            <Stack 
+              direction={{ xs: "column", sm: "row" }} 
+              spacing={{ xs: 1, sm: 2 }} 
+              justifyContent="center" 
+              alignItems="center"
             >
-              GitHub
-            </Link>
-          </Typography>
+              <Typography variant="body2" color="text.secondary" align="center">
+                {'Made with ❤️ by Doruk for FHNW EMOBA module'}
+              </Typography>
+              <Box 
+                sx={{ 
+                  width: '4px', 
+                  height: '4px', 
+                  borderRadius: '50%', 
+                  bgcolor: 'rgba(255,255,255,0.3)',
+                  display: { xs: 'none', sm: 'block' }
+                }} 
+              />
+              <Link 
+                href="https://github.com/peaktwilight/ThatsAppMQTTDebugger" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                color="primary"
+                underline="hover"
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 0.5,
+                  fontSize: '0.875rem',
+                  fontWeight: 500
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                </svg>
+                GitHub Repository
+              </Link>
+            </Stack>
+          </Container>
         </Box>
       </Box>
     </>

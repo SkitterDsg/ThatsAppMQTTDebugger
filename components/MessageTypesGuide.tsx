@@ -92,9 +92,16 @@ export default function MessageTypesGuide() {
         onClick={handleOpen} 
         startIcon={<InfoIcon />}
         variant="outlined"
-        color="primary"
+        color="inherit"
         size="small"
-        sx={{ ml: 1 }}
+        sx={{ 
+          ml: 1,
+          borderColor: 'rgba(255,255,255,0.3)',
+          '&:hover': {
+            borderColor: 'rgba(255,255,255,0.5)',
+            backgroundColor: 'rgba(255,255,255,0.05)'
+          }
+        }}
       >
         Message Types Guide
       </Button>

@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { 
   Paper, 
   Typography, 
@@ -14,8 +14,10 @@ import {
   FormControlLabel,
   Switch,
   Tooltip,
-  Avatar
+  Avatar,
+  Fade
 } from '@mui/material';
+import { keyframes } from '@mui/system';
 import ClearIcon from '@mui/icons-material/Clear';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
@@ -308,6 +310,42 @@ const MessageContent = ({ message }: { message: string }) => {
   }
 };
 
+// Define animations
+
+const glowHighlight = keyframes`
+  0% {
+    background-color: rgba(57, 73, 171, 0.1);
+    box-shadow: 0 0 2px rgba(57, 73, 171, 0.3);
+    transform: translateY(0px);
+  }
+  30% {
+    background-color: rgba(57, 73, 171, 0.2);
+    box-shadow: 0 0 10px rgba(57, 73, 171, 0.5);
+    transform: translateY(-2px);
+  }
+  60% {
+    background-color: rgba(57, 73, 171, 0.15);
+    box-shadow: 0 0 6px rgba(57, 73, 171, 0.3);
+    transform: translateY(-1px);
+  }
+  100% {
+    background-color: rgba(0, 0, 0, 0);
+    box-shadow: none;
+    transform: translateY(0px);
+  }
+`;
+
+const slideIn = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
+
 export default function MessageViewer() {
   const { messages, clearMessages } = useMQTT();
   const [filter, setFilter] = useState('');
@@ -315,6 +353,10 @@ export default function MessageViewer() {
   const [autoScroll, setAutoScroll] = useState(true);
   const [filterDuplicates, setFilterDuplicates] = useState(true);
   const [messageListRef, setMessageListRef] = useState<HTMLDivElement | null>(null);
+  
+  // Track messages for animations
+  const prevMessagesLengthRef = useRef(0);
+  const [newMessageIndex, setNewMessageIndex] = useState<number | null>(null);
 
   // Create a filtered list of messages with duplicate detection
   const filteredMessages = useMemo(() => {
@@ -352,6 +394,42 @@ export default function MessageViewer() {
     return filtered;
   }, [messages, filter, filterDuplicates]);
 
+  // Effect to detect new messages for animation
+  useEffect(() => {
+    if (messages.length > prevMessagesLengthRef.current) {
+      // New message received - set its index for animation
+      setNewMessageIndex(0); // Always animate the newest message (first in the list)
+      
+      // Clear the animation after 2000ms (longer duration for more visibility)
+      const timer = setTimeout(() => {
+        setNewMessageIndex(null);
+      }, 2000);
+      
+      return () => clearTimeout(timer);
+    }
+    
+    prevMessagesLengthRef.current = messages.length;
+  }, [messages.length]);
+  
+  // Additional effect for animation when message count changes at all
+  useEffect(() => {
+    // This ensures animations work even with filtered messages
+    if (filteredMessages.length > 0) {
+      // Force re-render with a small delay to ensure animation triggers
+      const timer = setTimeout(() => {
+        setNewMessageIndex(0);
+        
+        // Clear the animation after a short period
+        setTimeout(() => {
+          setNewMessageIndex(null);
+        }, 2000);
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [filteredMessages.length]);
+
+  // Auto-scroll effect
   useEffect(() => {
     if (autoScroll && messageListRef) {
       messageListRef.scrollTop = messageListRef.scrollHeight;
@@ -446,12 +524,40 @@ export default function MessageViewer() {
   };
 
   return (
-    <Paper sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-        <Typography variant="h6">
+    <Paper 
+      sx={{ 
+        p: 2.5, 
+        height: '100%', 
+        display: 'flex', 
+        flexDirection: 'column',
+        backgroundColor: 'rgba(30, 30, 36, 0.6)',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+      }}
+    >
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        mb: 2,
+        flexWrap: { xs: 'wrap', sm: 'nowrap' },
+        gap: { xs: 1, sm: 0 }
+      }}>
+        <Typography 
+          variant="h6" 
+          sx={{ 
+            fontWeight: 600,
+            color: 'primary.main'
+          }}
+        >
           Messages
         </Typography>
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          justifyContent: { xs: 'flex-end', sm: 'flex-end' },
+          gap: 0.5
+        }}>
           <FormControlLabel
             control={
               <Switch
@@ -460,8 +566,12 @@ export default function MessageViewer() {
                 onChange={(e) => setAutoScroll(e.target.checked)}
               />
             }
-            label="Auto-scroll"
-            sx={{ mr: 1 }}
+            label={
+              <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                Auto-scroll
+              </Typography>
+            }
+            sx={{ mr: 2 }}
           />
           <Tooltip title="Filter out duplicate messages">
             <FormControlLabel
@@ -472,22 +582,39 @@ export default function MessageViewer() {
                   onChange={(e) => setFilterDuplicates(e.target.checked)}
                 />
               }
-              label="Filter duplicates"
-              sx={{ mr: 1 }}
+              label={
+                <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                  Filter duplicates
+                </Typography>
+              }
+              sx={{ mr: 2 }}
             />
           </Tooltip>
           <IconButton 
             size="small" 
             onClick={() => setShowFilters(!showFilters)}
             color={showFilters ? "primary" : "default"}
+            sx={{ 
+              bgcolor: showFilters ? 'rgba(92, 107, 192, 0.1)' : 'transparent',
+              '&:hover': {
+                bgcolor: showFilters ? 'rgba(92, 107, 192, 0.15)' : 'rgba(255, 255, 255, 0.05)'
+              }
+            }}
           >
-            <FilterListIcon />
+            <FilterListIcon fontSize="small" />
           </IconButton>
           <Button 
             size="small" 
-            startIcon={<ClearIcon />} 
+            startIcon={<ClearIcon fontSize="small" />} 
             onClick={clearMessages}
             disabled={messages.length === 0}
+            variant="outlined"
+            sx={{ 
+              ml: 0.5,
+              borderRadius: '6px',
+              textTransform: 'none',
+              fontSize: '0.8rem'
+            }}
           >
             Clear
           </Button>
@@ -495,7 +622,7 @@ export default function MessageViewer() {
       </Box>
 
       <Collapse in={showFilters}>
-        <Box sx={{ mb: 2 }}>
+        <Box sx={{ mb: 2.5 }}>
           <TextField
             fullWidth
             size="small"
@@ -504,13 +631,22 @@ export default function MessageViewer() {
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
             placeholder="Enter topic filter"
+            InputProps={{
+              sx: {
+                borderRadius: '8px',
+                bgcolor: 'rgba(0, 0, 0, 0.1)',
+                '&:hover': {
+                  bgcolor: 'rgba(0, 0, 0, 0.15)'
+                }
+              }
+            }}
           />
           <Box sx={{ mt: 1, display: 'flex', justifyContent: 'space-between' }}>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
               {filterDuplicates && filteredMessages.length !== messages.length ? 
                 `${messages.length - filteredMessages.length} duplicates filtered out` : ''}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
               {filteredMessages.length} of {messages.length} messages
             </Typography>
           </Box>
@@ -523,39 +659,123 @@ export default function MessageViewer() {
           flexGrow: 1,
           maxHeight: '700px',
           overflowY: 'auto', 
-          border: '1px solid rgba(255, 255, 255, 0.12)', 
-          borderRadius: 1,
-          bgcolor: 'background.paper' 
+          border: '1px solid rgba(255, 255, 255, 0.08)', 
+          borderRadius: 2,
+          bgcolor: 'rgba(0, 0, 0, 0.2)',
+          backdropFilter: 'blur(4px)',
+          boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.1)'
         }}
       >
         {filteredMessages.length === 0 ? (
-          <Box sx={{ p: 2, textAlign: 'center' }}>
-            <Typography variant="body2" color="text.secondary">
-              No messages received yet. Subscribe to topics to see messages.
-            </Typography>
-          </Box>
+          <Fade in={true} timeout={500}>
+            <Box sx={{ 
+              p: 4, 
+              textAlign: 'center',
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}>
+              <Box 
+                sx={{ 
+                  mb: 2,
+                  opacity: 0.5
+                }}
+              >
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M22 6L12 13L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </Box>
+              <Typography 
+                variant="body1" 
+                color="text.secondary"
+                sx={{
+                  fontWeight: 500,
+                  mb: 1
+                }}
+              >
+                No messages received yet
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ opacity: 0.7 }}>
+                Subscribe to topics to see messages appear here
+              </Typography>
+            </Box>
+          </Fade>
         ) : (
           <List disablePadding>
             {filteredMessages.map((msg, idx) => (
               <Box key={idx}>
                 {idx > 0 && <Divider />}
-                <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', py: 1 }}>
-                  <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                <Box
+                  sx={{
+                    animation: idx === 0 ? `${slideIn} 0.4s ease` : 'none',
+                    width: '100%'
+                  }}
+                >
+                <ListItem 
+                  sx={{ 
+                    flexDirection: 'column', 
+                    alignItems: 'flex-start', 
+                    py: 1.5,
+                    px: 2,
+                    my: 0.75,
+                    mx: 0.5,
+                    borderRadius: 2,
+                    transition: 'all 0.2s ease',
+                    animation: idx === newMessageIndex ? 
+                      `${glowHighlight} 2s ease` : 'none',
+                    backgroundColor: idx === newMessageIndex ? 
+                      'rgba(57, 73, 171, 0.08)' : 'transparent',
+                    '&:hover': {
+                      bgcolor: 'rgba(255, 255, 255, 0.05)',
+                      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+                    }
+                  }}
+                >
+                  <Box sx={{ 
+                    width: '100%', 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    mb: 0.75,
+                    flexWrap: { xs: 'wrap', sm: 'nowrap' },
+                    gap: { xs: 0.5, sm: 0 }
+                  }}>
+                    <Box sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: 0.75, 
+                      flexWrap: 'wrap',
+                      maxWidth: { xs: '100%', sm: '80%' }
+                    }}>
                       <Chip 
                         label={msg.topic} 
                         size="small" 
                         variant="outlined" 
                         color="primary"
+                        sx={{ 
+                          fontWeight: 500,
+                          fontSize: '0.7rem',
+                          height: '24px',
+                          borderRadius: '12px',
+                          backgroundColor: 'rgba(92, 107, 192, 0.15)'
+                        }}
                       />
                       {msg.retained && (
                         <Tooltip title="Retained message">
                           <Chip
-                            icon={<BookmarkIcon fontSize="small" />}
+                            icon={<BookmarkIcon sx={{ fontSize: '0.85rem' }} />}
                             label="Retained"
                             size="small"
                             color="warning"
                             variant="outlined"
+                            sx={{ 
+                              height: '24px',
+                              fontSize: '0.7rem',
+                              borderRadius: '12px',
+                              backgroundColor: 'rgba(255, 167, 38, 0.15)'
+                            }}
                           />
                         </Tooltip>
                       )}
@@ -568,11 +788,28 @@ export default function MessageViewer() {
                             size="small"
                             color={getMessageTypeInfo(msg.message)?.color as any}
                             variant="outlined"
+                            sx={{ 
+                              height: '24px',
+                              fontSize: '0.7rem',
+                              borderRadius: '12px',
+                              fontWeight: 500,
+                              backgroundColor: msg.retained ? 'rgba(0, 0, 0, 0.2)' : 'rgba(0, 0, 0, 0.1)'
+                            }}
                           />
                         </Tooltip>
                       )}
                     </Box>
-                    <Typography variant="caption" color="text.secondary">
+                    <Typography 
+                      variant="caption" 
+                      color="text.secondary"
+                      sx={{ 
+                        fontSize: '0.7rem',
+                        opacity: 0.7,
+                        letterSpacing: 0.5,
+                        fontWeight: 500,
+                        mt: { xs: 0.5, sm: 0 } 
+                      }}
+                    >
                       {formatTimestamp(msg.timestamp)}
                     </Typography>
                   </Box>
@@ -583,10 +820,12 @@ export default function MessageViewer() {
                       <Box 
                         sx={{ 
                           mt: 1,
-                          p: 1.5,
-                          bgcolor: 'rgba(0, 0, 0, 0.2)',
-                          borderRadius: 1,
+                          p: 1.75,
+                          bgcolor: 'rgba(0, 0, 0, 0.15)',
+                          borderRadius: 2,
                           overflow: 'hidden',
+                          border: '1px solid rgba(255, 255, 255, 0.05)',
+                          boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.1)'
                         }}
                       >
                         <MessageContent message={msg.message} />
@@ -598,21 +837,25 @@ export default function MessageViewer() {
                       sx={{ 
                         width: '100%', 
                         mt: 1, 
-                        p: 1, 
-                        bgcolor: 'rgba(0, 0, 0, 0.2)', 
-                        borderRadius: 1,
+                        p: 1.75, 
+                        bgcolor: 'rgba(0, 0, 0, 0.15)', 
+                        borderRadius: 2,
                         overflow: 'auto',
                         fontSize: '0.85rem',
-                        fontFamily: 'monospace',
+                        fontFamily: '"JetBrains Mono", "Fira Code", monospace',
                         whiteSpace: 'pre-wrap',
                         wordBreak: 'break-word',
-                        maxHeight: '300px'
+                        maxHeight: '300px',
+                        border: '1px solid rgba(255, 255, 255, 0.05)',
+                        boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.1)',
+                        lineHeight: 1.5
                       }}
                     >
                       {isJsonString(msg.message) ? formatMessage(msg.message) : msg.message}
                     </Box>
                   )}
                 </ListItem>
+                </Box>
               </Box>
             ))}
           </List>
