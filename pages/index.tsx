@@ -1,5 +1,5 @@
 import { Box, Container, Typography, AppBar, Toolbar, Link, Stack } from '@mui/material';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Head from 'next/head';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
@@ -18,9 +18,10 @@ export default function Home() {
   const [hasInitialSubscribed, setHasInitialSubscribed] = useState(false);
   const [showConnectGuide, setShowConnectGuide] = useState(true);
 
-  // Hide the connect guide when connected
+  // Hide the connect guide immediately when connected
   useEffect(() => {
     if (isConnected) {
+      // Set to false immediately - don't wait for animation
       setShowConnectGuide(false);
     }
   }, [isConnected]);
@@ -103,68 +104,93 @@ export default function Home() {
                     <Box position="relative">
                       <ConnectionForm />
                       
-                      {showConnectGuide && (
-                        <Box
-                          component={motion.div}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ 
-                            opacity: 1, 
-                            y: 0,
-                            transition: { 
-                              delay: 0.5, 
-                              duration: 0.5
-                            }
-                          }}
-                          sx={{
-                            position: 'absolute',
-                            bottom: '-90px', // Position between ConnectionForm and TopicSubscriber with extra space
-                            left: '40px', // Aligned with the Connect button
-                            zIndex: 50,
-                            width: '100%',
-                            maxWidth: 280,
-                            textAlign: 'center',
-                          }}
-                        >
-                          <motion.div
+                      <AnimatePresence mode="wait">
+                        {showConnectGuide && (
+                          <Box
+                            component={motion.div}
+                            initial={{ opacity: 0, y: 20, scale: 0.9 }}
                             animate={{ 
-                              y: [0, 8, 0],
+                              opacity: 1, 
+                              y: 0,
+                              scale: 1,
+                              transition: { 
+                                delay: 0.5, 
+                                duration: 0.5,
+                                type: "spring",
+                                stiffness: 300,
+                                damping: 24
+                              }
                             }}
-                            transition={{ 
-                              repeat: Infinity,
-                              repeatType: "reverse",
-                              duration: 1.5,
-                              ease: "easeInOut"
+                            exit={{ 
+                              opacity: 0, 
+                              scale: 0.8,
+                              transition: { 
+                                duration: 0.2,
+                                ease: "easeOut"
+                              }
+                            }}
+                            sx={{
+                              position: 'absolute',
+                              bottom: '-90px', // Position between ConnectionForm and TopicSubscriber with extra space
+                              left: '40px', // Aligned with the Connect button
+                              zIndex: 50,
+                              width: '100%',
+                              maxWidth: 280,
+                              textAlign: 'center',
                             }}
                           >
-                            <Box sx={{
-                              position: 'relative'
-                            }}>
+                            <motion.div
+                              animate={{ 
+                                y: [0, 8, 0],
+                              }}
+                              transition={{ 
+                                repeat: Infinity,
+                                repeatType: "reverse",
+                                duration: 1.5,
+                                ease: "easeInOut"
+                              }}
+                            >
                               <Box sx={{
-                                fontSize: '24px',
-                                color: 'primary.main',
-                                position: 'absolute',
-                                top: '-40px', // Position arrow higher above the text
-                                left: '20px' // Position arrow to the left
+                                position: 'relative'
                               }}>
-                                ↑
-                              </Box>
-                              <Box sx={{
-                                background: 'linear-gradient(135deg, rgba(57, 73, 171, 0.9) 0%, rgba(48, 63, 159, 0.95) 100%)',
-                                boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.15), 0 4px 12px rgba(0, 0, 0, 0.3)',
-                                borderRadius: 2,
-                                p: 2
-                              }}>
-                                <Typography variant="body2" sx={{ 
-                                  fontWeight: 500,
-                                  color: 'white'
+                                <Box sx={{
+                                  background: 'linear-gradient(135deg, rgba(57, 73, 171, 0.9) 0%, rgba(48, 63, 159, 0.95) 100%)',
+                                  boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.15), 0 4px 12px rgba(0, 0, 0, 0.3)',
+                                  borderRadius: 2,
+                                  p: 2,
+                                  position: 'relative'
                                 }}>
-                                  Click Connect to begin debugging
-                                </Typography>
+                                  <Box 
+                                    component={motion.div}
+                                    sx={{
+                                      fontSize: '24px',
+                                      color: 'primary.main',
+                                      position: 'absolute',
+                                      top: '-40px',
+                                      left: '20px'
+                                    }}
+                                    animate={{ y: [-2, 2, -2] }}
+                                    transition={{
+                                      repeat: Infinity,
+                                      repeatType: "reverse",
+                                      duration: 1.5,
+                                      ease: "easeInOut"
+                                    }}
+                                  >
+                                    ↑
+                                  </Box>
+                                  <Typography variant="body2" sx={{ 
+                                    fontWeight: 500,
+                                    color: 'white'
+                                  }}>
+                                    Click Connect to begin debugging
+                                  </Typography>
+                                </Box>
                               </Box>
-                            </Box>
-                          </motion.div>
-                        </Box>
-                      )}
+                            </motion.div>
+                          </Box>
+                        )}
+                      </AnimatePresence>
                     </Box>
                     
                     <TopicSubscriber />
