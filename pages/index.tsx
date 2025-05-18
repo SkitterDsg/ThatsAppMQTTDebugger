@@ -27,7 +27,7 @@ export default function Home() {
         <title>ThatsApp MQTT Debugger</title>
         <meta name="description" content="Debug MQTT messages for ThatsApp" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/thatsapp.png" />
       </Head>
 
       <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -39,12 +39,13 @@ export default function Home() {
               gap: 1.5, 
               flexGrow: 1 
             }}>
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2L4 5V11.09C4 16.14 7.41 20.85 12 22C16.59 20.85 20 16.14 20 11.09V5L12 2Z" fill="#EC407A" opacity="0.6" />
-                <path d="M12 6L7 8V12C7 14.8 9.13 17.67 12 18.5C14.87 17.67 17 14.8 17 12V8L12 6Z" fill="#EC407A" />
-                <path d="M11.5 14.5V11L9 9.5L9.5 12L11.5 14.5Z" fill="white" />
-                <path d="M12.5 14.5V11L15 9.5L14.5 12L12.5 14.5Z" fill="white" />
-              </svg>
+              <img 
+                src="/thatsapp.png" 
+                alt="ThatsApp Logo" 
+                width="28" 
+                height="28" 
+                style={{ borderRadius: '6px' }}
+              />
               <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
                 ThatsApp MQTT Debugger
               </Typography>
