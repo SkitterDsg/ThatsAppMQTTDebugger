@@ -359,9 +359,9 @@ export default function MessageViewer() {
     
     // For performance, limit the number of messages shown if there are too many
     // This prevents performance degradation with large message volumes
-    const MAX_DISPLAY_MESSAGES = 150;
+    const MAX_DISPLAY_MESSAGES = 100;
     if (filtered.length > MAX_DISPLAY_MESSAGES) {
-      filtered = filtered.slice(0, MAX_DISPLAY_MESSAGES);
+      filtered = filtered.slice(filtered.length - MAX_DISPLAY_MESSAGES, filtered.length);
     }
     
     return filtered;
@@ -808,11 +808,13 @@ export default function MessageViewer() {
               >
                 <Box sx={{ mt: 1, display: 'flex', justifyContent: 'space-between' }}>
                   <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
-                    {filterDuplicates && filteredMessages.length !== messages.length ? 
-                      `${messages.length - filteredMessages.length} duplicates filtered out` : ''}
+                    {filterDuplicates && messages.filter(msg => !filter || msg.topic.includes(filter)).length !== filteredMessages.length ? 
+                      `${messages.filter(msg => !filter || msg.topic.includes(filter)).length - filteredMessages.length} messages filtered` : ''}
                   </Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
-                    {filteredMessages.length} of {messages.length} messages
+                    {filteredMessages.length} of {messages.length} messages 
+                    {filteredMessages.length < messages.length && filteredMessages.length === 100 ? 
+                      ' (showing latest 100)' : ''}
                   </Typography>
                 </Box>
               </motion.div>
