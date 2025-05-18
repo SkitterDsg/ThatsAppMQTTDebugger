@@ -1,6 +1,7 @@
 import { Box, Container, Typography, AppBar, Toolbar, Link, Stack } from '@mui/material';
 import { motion } from 'framer-motion';
 import Head from 'next/head';
+import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { useEffect } from 'react';
 import { useMQTT } from '../contexts/MQTTContext';
@@ -48,13 +49,14 @@ export default function Home() {
                 gap: 1.5, 
                 flexGrow: 1 
               }}>
-                <img 
-                  src="/thatsapp.png" 
-                  alt="ThatsApp Logo" 
-                  width="28" 
-                  height="28" 
-                  style={{ borderRadius: '6px' }}
-                />
+                <Box sx={{ width: 28, height: 28, position: 'relative', borderRadius: '6px', overflow: 'hidden' }}>
+                  <Image 
+                    src="/thatsapp.png" 
+                    alt="ThatsApp Logo" 
+                    fill
+                    style={{ objectFit: 'contain' }}
+                  />
+                </Box>
                 <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
                   ThatsApp MQTT Debugger
                 </Typography>
