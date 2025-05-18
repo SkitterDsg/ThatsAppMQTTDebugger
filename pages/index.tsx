@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import Head from 'next/head';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useMQTT } from '../contexts/MQTTContext';
 
 // Dynamically import components with client-side only rendering
@@ -15,13 +15,15 @@ const MessageTypesGuide = dynamic(() => import('../components/MessageTypesGuide'
 
 export default function Home() {
   const { isConnected, subscribe } = useMQTT();
+  const [hasInitialSubscribed, setHasInitialSubscribed] = useState(false);
 
-  // Auto-subscribe to ThatsApp topics when connected
+  // Auto-subscribe to default topic only on first connection
   useEffect(() => {
-    if (isConnected) {
+    if (isConnected && !hasInitialSubscribed) {
       subscribe('thatsapp/publictest/#');
+      setHasInitialSubscribed(true);
     }
-  }, [isConnected, subscribe]);
+  }, [isConnected, subscribe, hasInitialSubscribed]);
 
   return (
     <>

@@ -163,6 +163,7 @@ export const MQTTProvider: React.FC<MQTTProviderProps> = ({ children }) => {
       setClient(null);
       setIsConnected(false);
       setSubscribedTopics([]);
+      setMessages([]); // Clear messages when disconnecting
     }
   };
 
