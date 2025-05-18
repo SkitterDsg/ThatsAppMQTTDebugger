@@ -314,7 +314,7 @@ export default function MessageViewer() {
   const { messages, clearMessages } = useMQTT();
   const [filter, setFilter] = useState('');
   const [showFilters, setShowFilters] = useState(false);
-  const [autoScroll, setAutoScroll] = useState(true);
+  const [autoScroll, setAutoScroll] = useState(false);
   const [filterDuplicates, setFilterDuplicates] = useState(true);
   const [messageListRef, setMessageListRef] = useState<HTMLDivElement | null>(null);
   const [newMessagesBelowView, setNewMessagesBelowView] = useState(false);
