@@ -69,19 +69,6 @@ export default function Home() {
           }}
         >
           <Typography variant="body2" color="text.secondary" align="center">
-            ThatsApp MQTT Debugger - An open-source tool for debugging MQTT messages
-          </Typography>
-          <Typography variant="body2" color="text.secondary" align="center">
-            {'Built with '}
-            <Link href="https://nextjs.org/" target="_blank" rel="noopener" color="inherit">
-              Next.js
-            </Link>
-            {' and '}
-            <Link href="https://www.emqx.com/en/blog/mqtt-js-tutorial" target="_blank" rel="noopener" color="inherit">
-              Paho MQTT
-            </Link>
-          </Typography>
-          <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 0.5 }}>
             {'Made with ❤️ by Doruk for FHNW EMOBA module'}
           </Typography>
         </Box>
