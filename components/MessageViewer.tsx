@@ -14,11 +14,7 @@ import {
   FormControlLabel,
   Switch,
   Tooltip,
-  Stack,
-  Card,
-  CardContent,
-  Avatar,
-  Grid
+  Avatar
 } from '@mui/material';
 import ClearIcon from '@mui/icons-material/Clear';
 import FilterListIcon from '@mui/icons-material/FilterList';
@@ -293,7 +289,7 @@ const MessageContent = ({ message }: { message: string }) => {
           </Box>
         );
     }
-  } catch (err) {
+  } catch (_) {
     // Fallback for parsing errors
     return (
       <Box 
