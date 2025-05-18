@@ -735,11 +735,11 @@ export default function MessageViewer() {
               />
             }
             label={
-              <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+              <Typography variant="body2" sx={{ fontSize: '0.8rem', ml: 0.5 }}>
                 Auto-scroll
               </Typography>
             }
-            sx={{ mr: 2 }}
+            sx={{ mr: 2, my: 0 }}
           />
           <Tooltip title="Filter out duplicate messages">
             <FormControlLabel
@@ -751,11 +751,11 @@ export default function MessageViewer() {
                 />
               }
               label={
-                <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                <Typography variant="body2" sx={{ fontSize: '0.8rem', ml: 0.5 }}>
                   Filter duplicates
                 </Typography>
               }
-              sx={{ mr: 2 }}
+              sx={{ mr: 2, my: 0 }}
             />
           </Tooltip>
           <IconButton 
@@ -854,6 +854,7 @@ export default function MessageViewer() {
             height: '100%',
             maxHeight: '700px',
             overflowY: 'auto', 
+            overflowX: 'hidden',
             border: '1px solid rgba(255, 255, 255, 0.08)', 
             borderRadius: 2,
             bgcolor: 'rgba(0, 0, 0, 0.2)',
@@ -941,6 +942,8 @@ export default function MessageViewer() {
               sx={{
                 display: 'grid',
                 gridTemplateRows: 'repeat(auto-fill, auto)',
+                width: '100%',
+                overflow: 'hidden'
               }}
             >
               <AnimatePresence initial={false}>
@@ -955,7 +958,7 @@ export default function MessageViewer() {
                       animate="visible"
                       exit="exit"
                       layout
-                      style={{ overflow: 'hidden' }}
+                      style={{ overflow: 'hidden', width: '100%' }}
                     >
                       {idx > 0 && <Divider />}
                       <Box sx={{ width: '100%', position: 'relative' }}>

@@ -161,7 +161,6 @@ export default function MessagePublisher() {
         variants={itemVariants}
         sx={{ 
           p: 3, 
-          mb: 2, 
           borderRadius: 2,
           boxShadow: "0 10px 30px rgba(0, 0, 0, 0.1)",
           backdropFilter: "blur(10px)",
@@ -203,7 +202,7 @@ export default function MessagePublisher() {
           
           <motion.div 
             variants={itemVariants}
-            sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+            sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
           >
             <Stack direction="row" spacing={2}>
               <FormControlLabel
@@ -212,9 +211,15 @@ export default function MessagePublisher() {
                     checked={isJsonMessage}
                     onChange={(e) => setIsJsonMessage(e.target.checked)}
                     color="primary"
+                    size="small"
                   />
                 }
-                label="Format as JSON"
+                label={
+                  <Typography variant="body2" sx={{ fontSize: '0.85rem', ml: 0.5 }}>
+                    Format as JSON
+                  </Typography>
+                }
+                sx={{ my: 0 }}
               />
               <FormControlLabel
                 control={
@@ -222,9 +227,15 @@ export default function MessagePublisher() {
                     checked={retained}
                     onChange={(e) => setRetained(e.target.checked)}
                     color="warning"
+                    size="small"
                   />
                 }
-                label="Retained"
+                label={
+                  <Typography variant="body2" sx={{ fontSize: '0.85rem', ml: 0.5 }}>
+                    Retained
+                  </Typography>
+                }
+                sx={{ my: 0 }}
               />
             </Stack>
           </motion.div>
@@ -238,8 +249,8 @@ export default function MessagePublisher() {
                 exit="exit"
                 variants={templateVariants}
               >
-                <Box sx={{ mb: 2 }}>
-                  <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
+                <Box sx={{ mb: 3, mt: 3 }}>
+                  <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600, mt: 0, mb: 2 }}>
                     ThatsApp Message Templates
                   </Typography>
                   <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }} sx={{ mb: 2 }}>
@@ -271,7 +282,7 @@ export default function MessagePublisher() {
                     />
                   </Stack>
                   <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }} sx={{ mb: 2 }}>
-                    <FormControl fullWidth size="small">
+                    <FormControl size="small" sx={{ width: { xs: '100%', sm: '60%' } }}>
                       <InputLabel>Message Type</InputLabel>
                       <Select
                         value={messageType}
@@ -296,6 +307,7 @@ export default function MessagePublisher() {
                       whileHover="hover"
                       whileTap="tap"
                       variants={buttonVariants}
+                      style={{ width: '40%', flexGrow: 1 }}
                     >
                       <Button 
                         fullWidth
@@ -304,14 +316,15 @@ export default function MessagePublisher() {
                         sx={{ 
                           borderRadius: 1.5,
                           height: "100%",
-                          fontWeight: 500
+                          fontWeight: 500,
+                          whiteSpace: "nowrap"
                         }}
                       >
                         Create Template
                       </Button>
                     </motion.div>
                   </Stack>
-                  <Divider sx={{ mb: 2 }} />
+                  <Divider sx={{ mb: 3 }} />
                 </Box>
               </motion.div>
             )}

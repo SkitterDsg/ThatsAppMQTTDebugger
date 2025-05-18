@@ -106,7 +106,6 @@ export default function TopicSubscriber() {
         variants={itemVariants}
         sx={{ 
           p: 2.5, 
-          mb: 2,
           borderRadius: 2,
           backgroundColor: 'rgba(30, 30, 36, 0.6)',
           backdropFilter: "blur(8px)",

@@ -80,7 +80,6 @@ export default function ConnectionForm() {
         variants={itemVariants}
         sx={{ 
           p: 2, 
-          mb: 2, 
           borderRadius: 2,
           backdropFilter: "blur(10px)",
           boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)"

@@ -41,3 +41,12 @@ a {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.3);
 }
+
+/* Improve switch control spacing */
+.MuiFormControlLabel-root {
+  margin: 0;
+}
+
+.MuiFormControlLabel-label {
+  padding-left: 4px;
+}
