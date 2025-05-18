@@ -17,7 +17,6 @@ import {
 } from '@mui/material';
 import ClearIcon from '@mui/icons-material/Clear';
 import FilterListIcon from '@mui/icons-material/FilterList';
-import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import { useMQTT } from '../contexts/MQTTContext';
 
@@ -79,7 +78,7 @@ export default function MessageViewer() {
     try {
       const parsed = JSON.parse(msg);
       return JSON.stringify(parsed, null, 2);
-    } catch (e) {
+    } catch (_) {
       return msg;
     }
   };
@@ -88,7 +87,7 @@ export default function MessageViewer() {
     try {
       JSON.parse(str);
       return true;
-    } catch (e) {
+    } catch (_) {
       return false;
     }
   };

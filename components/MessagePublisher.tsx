@@ -87,7 +87,7 @@ export default function MessagePublisher() {
           JSON.parse(message);
           setJsonError('');
           publish(topic, message, retained);
-        } catch (err) {
+        } catch (_) {
           setJsonError('Invalid JSON format');
           return;
         }
@@ -201,7 +201,7 @@ export default function MessagePublisher() {
               try {
                 JSON.parse(e.target.value);
                 setJsonError('');
-              } catch (err) {
+              } catch (_) {
                 setJsonError('Invalid JSON format');
               }
             }
