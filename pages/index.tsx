@@ -31,27 +31,36 @@ export default function Home() {
       </Head>
 
       <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        <AppBar position="static" elevation={1}>
-          <Toolbar sx={{ px: { xs: 2, sm: 3 } }}>
-            <Box sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: 1.5, 
-              flexGrow: 1 
+        <AppBar position="static" elevation={1} sx={{ 
+          background: 'rgba(30, 30, 36, 0.8)',
+          backdropFilter: 'blur(10px)'
+        }}>
+          <Container maxWidth="xl">
+            <Toolbar disableGutters sx={{ 
+              px: { xs: 1, sm: 2 }, 
+              py: 1, 
+              borderRadius: { md: '0 0 12px 12px' }
             }}>
-              <img 
-                src="/thatsapp.png" 
-                alt="ThatsApp Logo" 
-                width="28" 
-                height="28" 
-                style={{ borderRadius: '6px' }}
-              />
-              <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
-                ThatsApp MQTT Debugger
-              </Typography>
-            </Box>
-            <MessageTypesGuide />
-          </Toolbar>
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 1.5, 
+                flexGrow: 1 
+              }}>
+                <img 
+                  src="/thatsapp.png" 
+                  alt="ThatsApp Logo" 
+                  width="28" 
+                  height="28" 
+                  style={{ borderRadius: '6px' }}
+                />
+                <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
+                  ThatsApp MQTT Debugger
+                </Typography>
+              </Box>
+              <MessageTypesGuide />
+            </Toolbar>
+          </Container>
         </AppBar>
 
         <Box sx={{ flexGrow: 1, overflow: 'visible' }}>
@@ -91,7 +100,7 @@ export default function Home() {
             mt: 3,
             borderTop: '1px solid rgba(255, 255, 255, 0.08)',
             backdropFilter: 'blur(10px)',
-            bgcolor: 'rgba(30, 30, 30, 0.8)'
+            bgcolor: 'rgba(30, 30, 36, 0.8)'
           }}
         >
           <Container maxWidth="xl">
