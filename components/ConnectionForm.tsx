@@ -80,10 +80,10 @@ export default function ConnectionForm() {
         component={motion.div}
         variants={itemVariants}
         sx={{ 
-          p: 2, 
+          p: 2.5, 
           borderRadius: 2,
-          backdropFilter: "blur(10px)",
-          boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)"
+          background: 'linear-gradient(135deg, rgba(28, 32, 50, 0.6) 0%, rgba(18, 20, 30, 0.75) 100%)',
+          boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 8px 32px rgba(0, 0, 0, 0.25)'
         }}
       >
         <motion.div variants={itemVariants}>
@@ -160,10 +160,12 @@ export default function ConnectionForm() {
               >
                 <Button 
                   variant="contained" 
-                  color="primary" 
+                  color="primary"
+                  disableElevation
                   onClick={handleConnect}
                   sx={{
-                    boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
+                    background: 'linear-gradient(135deg, rgba(57, 73, 171, 0.95) 0%, rgba(48, 63, 159, 1) 100%)',
+                    boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.15), 0 4px 12px rgba(0, 0, 0, 0.25)',
                     px: 3,
                     borderRadius: 2,
                     textTransform: "none",
@@ -182,10 +184,11 @@ export default function ConnectionForm() {
               >
                 <Button 
                   variant="contained" 
-                  color="error" 
+                  disableElevation
                   onClick={disconnect}
                   sx={{
-                    boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
+                    background: 'linear-gradient(135deg, rgba(239, 83, 80, 0.95) 0%, rgba(229, 57, 53, 1) 100%)',
+                    boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.15), 0 4px 12px rgba(0, 0, 0, 0.25)',
                     px: 3,
                     borderRadius: 2,
                     textTransform: "none",
