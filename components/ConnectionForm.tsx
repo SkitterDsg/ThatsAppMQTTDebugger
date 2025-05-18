@@ -4,7 +4,9 @@ import { useMQTT } from '../contexts/MQTTContext';
 
 export default function ConnectionForm() {
   const { connect, disconnect, isConnected } = useMQTT();
-  const [broker, setBroker] = useState('ws://broker.hivemq.com:8000/mqtt');
+  const [broker, setBroker] = useState(typeof window !== 'undefined' && window.location.protocol === 'https:' 
+    ? 'wss://broker.hivemq.com:8884/mqtt' 
+    : 'ws://broker.hivemq.com:8000/mqtt');
   const [clientId, setClientId] = useState(`thatsapp-debugger-${Math.random().toString(16).substring(2, 8)}`);
 
   const handleConnect = () => {
@@ -31,7 +33,9 @@ export default function ConnectionForm() {
             size="small"
           />
           <FormHelperText>
-            Browser requires WebSocket URLs (ws:// or wss://)
+            {window?.location?.protocol === 'https:' ? 
+              'Secure pages require WSS connections (wss://)' : 
+              'Browser requires WebSocket URLs (ws:// or wss://)'}
           </FormHelperText>
         </Box>
         <Box sx={{ flex: 1 }}>

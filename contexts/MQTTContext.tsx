@@ -85,10 +85,17 @@ export const MQTTProvider: React.FC<MQTTProviderProps> = ({ children }) => {
       // Parse URL to extract host, port, and path
       let url = new URL(brokerUrl);
       
+      // Check if we need to force WSS based on page protocol
+      if (window.location.protocol === 'https:' && url.protocol === 'ws:') {
+        console.warn('Upgrading insecure WebSocket to secure WebSocket due to HTTPS page');
+        // Change the protocol to wss if the page is served over https
+        url = new URL(`wss://${url.host}${url.pathname}${url.search}`);
+      }
+      
       // Remove protocol prefix (ws:// or wss://) from hostname
       const host = url.hostname;
       // Port defaults to 8000 if not provided
-      const port = url.port ? parseInt(url.port) : 8000;
+      const port = url.port ? parseInt(url.port) : (url.protocol === 'wss:' ? 443 : 8000);
       // Path defaults to /mqtt if not provided
       const path = url.pathname === "/" ? "/mqtt" : url.pathname;
       
