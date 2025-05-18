@@ -36,6 +36,7 @@ export default function MessagePublisher() {
   const [messageType, setMessageType] = useState('text');
   const [senderId, setSenderId] = useState('debugger');
   const [recipientId, setRecipientId] = useState('recipient');
+  const [retained, setRetained] = useState(false);
 
   const createTemplateMessage = () => {
     let templateMessage: ThatsAppMessage;
@@ -85,13 +86,13 @@ export default function MessagePublisher() {
           // Validate JSON
           JSON.parse(message);
           setJsonError('');
-          publish(topic, message);
+          publish(topic, message, retained);
         } catch (err) {
           setJsonError('Invalid JSON format');
           return;
         }
       } else {
-        publish(topic, message);
+        publish(topic, message, retained);
       }
     }
   };
@@ -114,16 +115,28 @@ export default function MessagePublisher() {
         />
         
         <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={isJsonMessage}
-                onChange={(e) => setIsJsonMessage(e.target.checked)}
-                color="primary"
-              />
-            }
-            label="Format as JSON"
-          />
+          <Stack direction="row" spacing={2}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={isJsonMessage}
+                  onChange={(e) => setIsJsonMessage(e.target.checked)}
+                  color="primary"
+                />
+              }
+              label="Format as JSON"
+            />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={retained}
+                  onChange={(e) => setRetained(e.target.checked)}
+                  color="warning"
+                />
+              }
+              label="Retained"
+            />
+          </Stack>
         </Box>
 
         {isJsonMessage && (

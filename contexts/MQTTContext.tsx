@@ -7,6 +7,7 @@ interface Message {
   message: string;
   timestamp: Date;
   parsedJSON?: any;
+  retained?: boolean;
 }
 
 interface MQTTContextType {
@@ -18,7 +19,7 @@ interface MQTTContextType {
   disconnect: () => void;
   subscribe: (topic: string) => void;
   unsubscribe: (topic: string) => void;
-  publish: (topic: string, message: string) => void;
+  publish: (topic: string, message: string, retained?: boolean) => void;
   clearMessages: () => void;
 }
 
@@ -108,6 +109,7 @@ export const MQTTProvider: React.FC<MQTTProviderProps> = ({ children }) => {
       mqttClient.onMessageArrived = (message) => {
         const topic = message.destinationName;
         const payload = message.payloadString;
+        const retained = message.retained;
         
         let parsedJSON = undefined;
         try {
@@ -118,7 +120,7 @@ export const MQTTProvider: React.FC<MQTTProviderProps> = ({ children }) => {
         
         setMessages((prev) => [
           ...prev,
-          { topic, message: payload, timestamp: new Date(), parsedJSON },
+          { topic, message: payload, timestamp: new Date(), parsedJSON, retained },
         ]);
       };
       
@@ -183,11 +185,12 @@ export const MQTTProvider: React.FC<MQTTProviderProps> = ({ children }) => {
     }
   };
 
-  const publish = (topic: string, message: string) => {
+  const publish = (topic: string, message: string, retained: boolean = false) => {
     if (client && isConnected && pahoMqtt) {
       try {
         const mqttMessage = new pahoMqtt.Message(message);
         mqttMessage.destinationName = topic;
+        mqttMessage.retained = retained;
         client.send(mqttMessage);
       } catch (e) {
         console.error(`Error publishing to ${topic}:`, e);

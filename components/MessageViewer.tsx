@@ -18,6 +18,7 @@ import {
 import ClearIcon from '@mui/icons-material/Clear';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
 import { useMQTT } from '../contexts/MQTTContext';
 
 export default function MessageViewer() {
@@ -39,8 +40,9 @@ export default function MessageViewer() {
     if (filterDuplicates) {
       const seen = new Map();
       filtered = filtered.filter((msg, index) => {
-        // Create a key from topic + message content
-        const key = `${msg.topic}:${msg.message}`;
+        // Create a key from topic + message content + retained status
+        // This ensures retained messages are treated differently from non-retained ones
+        const key = `${msg.topic}:${msg.message}:${msg.retained ? 'retained' : 'normal'}`;
         
         // If we haven't seen this message before, or it's the first occurrence, keep it
         if (!seen.has(key)) {
@@ -187,12 +189,25 @@ export default function MessageViewer() {
                 {idx > 0 && <Divider />}
                 <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', py: 1 }}>
                   <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                    <Chip 
-                      label={msg.topic} 
-                      size="small" 
-                      variant="outlined" 
-                      color="primary"
-                    />
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Chip 
+                        label={msg.topic} 
+                        size="small" 
+                        variant="outlined" 
+                        color="primary"
+                      />
+                      {msg.retained && (
+                        <Tooltip title="Retained message">
+                          <Chip
+                            icon={<BookmarkIcon fontSize="small" />}
+                            label="Retained"
+                            size="small"
+                            color="warning"
+                            variant="outlined"
+                          />
+                        </Tooltip>
+                      )}
+                    </Box>
                     <Typography variant="caption" color="text.secondary">
                       {formatTimestamp(msg.timestamp)}
                     </Typography>
