@@ -14,6 +14,7 @@ import {
   Stack,
   Divider
 } from '@mui/material';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useMQTT } from '../contexts/MQTTContext';
 import {
   ThatsAppMessage,
@@ -97,130 +98,282 @@ export default function MessagePublisher() {
     }
   };
 
+  // Define animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        when: "beforeChildren",
+        staggerChildren: 0.1,
+        duration: 0.5
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { type: "spring", stiffness: 300, damping: 20 }
+    }
+  };
+
+  const templateVariants = {
+    hidden: { opacity: 0, height: 0, overflow: "hidden" },
+    visible: { 
+      opacity: 1, 
+      height: "auto",
+      transition: {
+        opacity: { duration: 0.3 },
+        height: { type: "spring", stiffness: 300, damping: 30 }
+      }
+    },
+    exit: { 
+      opacity: 0,
+      height: 0,
+      transition: {
+        opacity: { duration: 0.2 },
+        height: { duration: 0.3 }
+      }
+    }
+  };
+
+  const buttonVariants = {
+    idle: { scale: 1 },
+    hover: { 
+      scale: 1.05,
+      boxShadow: "0 5px 15px rgba(0,0,0,0.1)",
+      transition: { type: "spring", stiffness: 400, damping: 10 }
+    },
+    tap: { scale: 0.95 }
+  };
+
   return (
-    <Paper sx={{ p: 2, mb: 2 }}>
-      <Typography variant="h6" gutterBottom>
-        Publish Message
-      </Typography>
-      <Box sx={{ mb: 2 }}>
-        <TextField
-          fullWidth
-          label="Topic"
-          variant="outlined"
-          value={topic}
-          onChange={(e) => setTopic(e.target.value)}
-          disabled={!isConnected}
-          size="small"
-          sx={{ mb: 2 }}
-        />
-        
-        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Stack direction="row" spacing={2}>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={isJsonMessage}
-                  onChange={(e) => setIsJsonMessage(e.target.checked)}
-                  color="primary"
-                />
-              }
-              label="Format as JSON"
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
+      <Paper 
+        component={motion.div}
+        variants={itemVariants}
+        sx={{ 
+          p: 3, 
+          mb: 2, 
+          borderRadius: 2,
+          boxShadow: "0 10px 30px rgba(0, 0, 0, 0.1)",
+          backdropFilter: "blur(10px)",
+          overflow: "hidden" // Important for animations
+        }}
+      >
+        <motion.div variants={itemVariants}>
+          <Typography 
+            variant="h6" 
+            sx={{ 
+              fontWeight: 600,
+              mb: 2,
+              color: "primary.main"
+            }}
+          >
+            Publish Message
+          </Typography>
+        </motion.div>
+
+        <Box sx={{ mb: 2 }}>
+          <motion.div variants={itemVariants}>
+            <TextField
+              fullWidth
+              label="Topic"
+              variant="outlined"
+              value={topic}
+              onChange={(e) => setTopic(e.target.value)}
+              disabled={!isConnected}
+              size="small"
+              sx={{ 
+                mb: 2,
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 2,
+                  transition: "all 0.3s ease"
+                }
+              }}
             />
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={retained}
-                  onChange={(e) => setRetained(e.target.checked)}
-                  color="warning"
-                />
-              }
-              label="Retained"
+          </motion.div>
+          
+          <motion.div 
+            variants={itemVariants}
+            sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+          >
+            <Stack direction="row" spacing={2}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={isJsonMessage}
+                    onChange={(e) => setIsJsonMessage(e.target.checked)}
+                    color="primary"
+                  />
+                }
+                label="Format as JSON"
+              />
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={retained}
+                    onChange={(e) => setRetained(e.target.checked)}
+                    color="warning"
+                  />
+                }
+                label="Retained"
+              />
+            </Stack>
+          </motion.div>
+
+          <AnimatePresence>
+            {isJsonMessage && (
+              <motion.div
+                key="json-template-controls"
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                variants={templateVariants}
+              >
+                <Box sx={{ mb: 2 }}>
+                  <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
+                    ThatsApp Message Templates
+                  </Typography>
+                  <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }} sx={{ mb: 2 }}>
+                    <TextField
+                      fullWidth
+                      label="Sender ID"
+                      size="small"
+                      value={senderId}
+                      onChange={(e) => setSenderId(e.target.value)}
+                      InputProps={{
+                        sx: {
+                          borderRadius: 1.5,
+                          transition: "all 0.3s ease"
+                        }
+                      }}
+                    />
+                    <TextField
+                      fullWidth
+                      label="Recipient ID"
+                      size="small"
+                      value={recipientId}
+                      onChange={(e) => setRecipientId(e.target.value)}
+                      InputProps={{
+                        sx: {
+                          borderRadius: 1.5,
+                          transition: "all 0.3s ease"
+                        }
+                      }}
+                    />
+                  </Stack>
+                  <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }} sx={{ mb: 2 }}>
+                    <FormControl fullWidth size="small">
+                      <InputLabel>Message Type</InputLabel>
+                      <Select
+                        value={messageType}
+                        label="Message Type"
+                        onChange={(e) => setMessageType(e.target.value)}
+                        sx={{ 
+                          borderRadius: 1.5,
+                          transition: "all 0.3s ease"
+                        }}
+                      >
+                        <MenuItem value="text">TEXT</MenuItem>
+                        <MenuItem value="image">IMAGE</MenuItem>
+                        <MenuItem value="location">LOCATION</MenuItem>
+                        <MenuItem value="profile_update">PROFILE_UPDATE</MenuItem>
+                        <MenuItem value="request_profile">REQUEST_PROFILE</MenuItem>
+                        <MenuItem value="typing">TYPING</MenuItem>
+                        <MenuItem value="online_poll">ONLINE_POLL</MenuItem>
+                        <MenuItem value="online_response">ONLINE_RESPONSE</MenuItem>
+                      </Select>
+                    </FormControl>
+                    <motion.div
+                      whileHover="hover"
+                      whileTap="tap"
+                      variants={buttonVariants}
+                    >
+                      <Button 
+                        fullWidth
+                        variant="outlined"
+                        onClick={createTemplateMessage}
+                        sx={{ 
+                          borderRadius: 1.5,
+                          height: "100%",
+                          fontWeight: 500
+                        }}
+                      >
+                        Create Template
+                      </Button>
+                    </motion.div>
+                  </Stack>
+                  <Divider sx={{ mb: 2 }} />
+                </Box>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          
+          <motion.div variants={itemVariants}>
+            <TextField
+              fullWidth
+              label="Message"
+              variant="outlined"
+              value={message}
+              onChange={(e) => {
+                setMessage(e.target.value);
+                if (isJsonMessage) {
+                  try {
+                    JSON.parse(e.target.value);
+                    setJsonError('');
+                  } catch (_) {
+                    setJsonError('Invalid JSON format');
+                  }
+                }
+              }}
+              disabled={!isConnected}
+              multiline
+              rows={8}
+              error={!!jsonError}
+              helperText={jsonError}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 2,
+                  transition: "all 0.3s ease",
+                  fontSize: "0.9rem",
+                  fontFamily: '"JetBrains Mono", monospace'
+                }
+              }}
             />
-          </Stack>
+          </motion.div>
         </Box>
 
-        {isJsonMessage && (
-          <Box sx={{ mb: 2 }}>
-            <Typography variant="subtitle2" gutterBottom>
-              ThatsApp Message Templates
-            </Typography>
-            <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }} sx={{ mb: 2 }}>
-              <TextField
-                fullWidth
-                label="Sender ID"
-                size="small"
-                value={senderId}
-                onChange={(e) => setSenderId(e.target.value)}
-              />
-              <TextField
-                fullWidth
-                label="Recipient ID"
-                size="small"
-                value={recipientId}
-                onChange={(e) => setRecipientId(e.target.value)}
-              />
-            </Stack>
-            <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }} sx={{ mb: 2 }}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Message Type</InputLabel>
-                <Select
-                  value={messageType}
-                  label="Message Type"
-                  onChange={(e) => setMessageType(e.target.value)}
-                >
-                  <MenuItem value="text">TEXT</MenuItem>
-                  <MenuItem value="image">IMAGE</MenuItem>
-                  <MenuItem value="location">LOCATION</MenuItem>
-                  <MenuItem value="profile_update">PROFILE_UPDATE</MenuItem>
-                  <MenuItem value="request_profile">REQUEST_PROFILE</MenuItem>
-                  <MenuItem value="typing">TYPING</MenuItem>
-                  <MenuItem value="online_poll">ONLINE_POLL</MenuItem>
-                  <MenuItem value="online_response">ONLINE_RESPONSE</MenuItem>
-                </Select>
-              </FormControl>
-              <Button 
-                fullWidth
-                variant="outlined"
-                onClick={createTemplateMessage}
-              >
-                Create Template
-              </Button>
-            </Stack>
-            <Divider sx={{ mb: 2 }} />
-          </Box>
-        )}
-        
-        <TextField
-          fullWidth
-          label="Message"
-          variant="outlined"
-          value={message}
-          onChange={(e) => {
-            setMessage(e.target.value);
-            if (isJsonMessage) {
-              try {
-                JSON.parse(e.target.value);
-                setJsonError('');
-              } catch (_) {
-                setJsonError('Invalid JSON format');
-              }
-            }
-          }}
-          disabled={!isConnected}
-          multiline
-          rows={8}
-          error={!!jsonError}
-          helperText={jsonError}
-        />
-      </Box>
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={handlePublish}
-        disabled={!isConnected || !topic.trim() || !message.trim() || !!jsonError}
-      >
-        Publish
-      </Button>
-    </Paper>
+        <motion.div 
+          variants={itemVariants}
+          whileHover="hover"
+          whileTap="tap"
+          initial="idle"
+        >
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handlePublish}
+            disabled={!isConnected || !topic.trim() || !message.trim() || !!jsonError}
+            sx={{ 
+              borderRadius: 2, 
+              px: 3,
+              py: 1,
+              fontWeight: 600,
+              textTransform: "none"
+            }}
+          >
+            Publish
+          </Button>
+        </motion.div>
+      </Paper>
+    </motion.div>
   );
 }

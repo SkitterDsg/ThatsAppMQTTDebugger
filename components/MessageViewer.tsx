@@ -18,6 +18,7 @@ import {
   Fade
 } from '@mui/material';
 import { keyframes } from '@mui/system';
+import { motion, AnimatePresence } from 'framer-motion';
 import ClearIcon from '@mui/icons-material/Clear';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
@@ -612,17 +613,95 @@ export default function MessageViewer() {
     }
   };
 
+  // Define Framer Motion variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        duration: 0.5,
+        when: "beforeChildren"
+      }
+    }
+  };
+
+  const listVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { 
+        staggerChildren: 0.05,
+        when: "beforeChildren"
+      }
+    }
+  };
+
+  const messageVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { 
+        type: "spring", 
+        damping: 20, 
+        stiffness: 300 
+      }
+    },
+    exit: { 
+      opacity: 0, 
+      x: -20, 
+      transition: { duration: 0.2 } 
+    }
+  };
+  
+  // Custom animation for new messages
+  const newMessageAnimationVariants = {
+    initial: {
+      borderLeft: '3px solid rgba(57, 73, 171, 0)',
+      backgroundColor: 'rgba(57, 73, 171, 0)'
+    },
+    animate: {
+      borderLeft: ['3px solid rgba(57, 73, 171, 0.6)', '3px solid rgba(57, 73, 171, 0.4)', '3px solid rgba(57, 73, 171, 0)'],
+      backgroundColor: ['rgba(57, 73, 171, 0.05)', 'rgba(57, 73, 171, 0.02)', 'rgba(57, 73, 171, 0)'],
+      transition: {
+        duration: 1.6,
+        times: [0, 0.4, 1],
+        ease: "easeInOut"
+      }
+    }
+  };
+
+  const filterVariants = {
+    closed: { height: 0, opacity: 0 },
+    open: { 
+      height: "auto", 
+      opacity: 1,
+      transition: { 
+        height: { type: "spring", stiffness: 300, damping: 25 },
+        opacity: { duration: 0.2 }
+      }
+    }
+  };
+
   return (
-    <Paper 
-      sx={{ 
-        p: 2.5, 
-        height: '100%', 
-        display: 'flex', 
-        flexDirection: 'column',
-        backgroundColor: 'rgba(30, 30, 36, 0.6)',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
-      }}
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
     >
+      <Paper 
+        component={motion.div}
+        sx={{ 
+          p: 2.5, 
+          height: '100%', 
+          display: 'flex', 
+          flexDirection: 'column',
+          backgroundColor: 'rgba(30, 30, 36, 0.6)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+          borderRadius: 3,
+          backdropFilter: "blur(10px)"
+        }}
+      >
       <Box sx={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
@@ -710,37 +789,63 @@ export default function MessageViewer() {
         </Box>
       </Box>
 
-      <Collapse in={showFilters}>
-        <Box sx={{ mb: 2.5 }}>
-          <TextField
-            fullWidth
-            size="small"
-            label="Filter by topic"
-            variant="outlined"
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            placeholder="Enter topic filter"
-            InputProps={{
-              sx: {
-                borderRadius: '8px',
-                bgcolor: 'rgba(0, 0, 0, 0.1)',
-                '&:hover': {
-                  bgcolor: 'rgba(0, 0, 0, 0.15)'
-                }
-              }
-            }}
-          />
-          <Box sx={{ mt: 1, display: 'flex', justifyContent: 'space-between' }}>
-            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
-              {filterDuplicates && filteredMessages.length !== messages.length ? 
-                `${messages.length - filteredMessages.length} duplicates filtered out` : ''}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
-              {filteredMessages.length} of {messages.length} messages
-            </Typography>
-          </Box>
-        </Box>
-      </Collapse>
+      <AnimatePresence>
+        {showFilters && (
+          <motion.div
+            initial="closed"
+            animate="open"
+            exit="closed"
+            variants={filterVariants}
+          >
+            <Box sx={{ mb: 2.5, overflow: 'hidden' }}>
+              <motion.div 
+                initial={{ y: -10, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.1, type: "spring", stiffness: 300, damping: 25 }}
+              >
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="Filter by topic"
+                  variant="outlined"
+                  value={filter}
+                  onChange={(e) => setFilter(e.target.value)}
+                  placeholder="Enter topic filter"
+                  InputProps={{
+                    sx: {
+                      borderRadius: '12px',
+                      bgcolor: 'rgba(0, 0, 0, 0.1)',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        bgcolor: 'rgba(0, 0, 0, 0.15)',
+                        boxShadow: '0 0 0 2px rgba(92, 107, 192, 0.2)'
+                      },
+                      '&:focus-within': {
+                        boxShadow: '0 0 0 2px rgba(92, 107, 192, 0.3)'
+                      }
+                    }
+                  }}
+                />
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2 }}
+              >
+                <Box sx={{ mt: 1, display: 'flex', justifyContent: 'space-between' }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                    {filterDuplicates && filteredMessages.length !== messages.length ? 
+                      `${messages.length - filteredMessages.length} duplicates filtered out` : ''}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                    {filteredMessages.length} of {messages.length} messages
+                  </Typography>
+                </Box>
+              </motion.div>
+            </Box>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <Box sx={{ position: 'relative', flexGrow: 1 }}>
         <Box 
@@ -758,94 +863,125 @@ export default function MessageViewer() {
             contain: 'content'
           }}
       >
-        {filteredMessages.length === 0 ? (
-          <Fade in={true} timeout={500}>
-            <Box sx={{ 
-              p: 4, 
-              textAlign: 'center',
-              height: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'center'
-            }}>
-              <Box 
-                sx={{ 
-                  mb: 2,
-                  opacity: 0.5
-                }}
-              >
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M22 6L12 13L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </Box>
-              <Typography 
-                variant="body1" 
-                color="text.secondary"
-                sx={{
-                  fontWeight: 500,
-                  mb: 1
-                }}
-              >
-                No messages received yet
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ opacity: 0.7 }}>
-                Subscribe to topics to see messages appear here
-              </Typography>
-            </Box>
-          </Fade>
-        ) : (
-          <List 
-            disablePadding
-            sx={{
-              display: 'grid',
-              gridTemplateRows: 'repeat(auto-fill, auto)',
-              transition: 'all 0.3s ease',
-            }}
-          >
-            {filteredMessages.map((msg, idx) => (
-              <Box 
-                key={idx} 
-                sx={{
-                  overflow: 'hidden',
-                  transition: 'transform 0.4s ease, max-height 0.4s ease',
-                  transform: 'translateZ(0)', // Force hardware acceleration
-                  willChange: 'transform, opacity, max-height', // Optimize for animation
-                }}
-              >
-                {idx > 0 && <Divider />}
-                <Box
-                  sx={{
-                    width: '100%',
-                    position: 'relative'
+        <AnimatePresence mode="wait">
+          {filteredMessages.length === 0 ? (
+            <motion.div
+              key="empty-state"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              style={{ height: '100%' }}
+            >
+              <Box sx={{ 
+                p: 4, 
+                textAlign: 'center',
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center'
+              }}>
+                <motion.div 
+                  animate={{ 
+                    opacity: [0.3, 0.7, 0.3],
+                    scale: [1, 1.05, 1],
+                    rotate: [0, 2, 0, -2, 0]
+                  }}
+                  transition={{ 
+                    duration: 8, 
+                    repeat: Infinity,
+                    times: [0, 0.5, 1]
                   }}
                 >
-                {/* Get message ID to check if it's being animated */}
-                {(() => {
+                  <Box sx={{ mb: 2 }}>
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M22 6L12 13L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </Box>
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <Typography 
+                    variant="body1" 
+                    color="text.secondary"
+                    sx={{
+                      fontWeight: 500,
+                      mb: 1
+                    }}
+                  >
+                    No messages received yet
+                  </Typography>
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <Typography variant="body2" color="text.secondary" sx={{ opacity: 0.7 }}>
+                    Subscribe to topics to see messages appear here
+                  </Typography>
+                </motion.div>
+              </Box>
+            </motion.div>
+          ) : (
+          <motion.div
+            key="message-list"
+            initial="hidden"
+            animate="visible"
+            variants={listVariants}
+          >
+            <List 
+              disablePadding
+              component={motion.ul}
+              sx={{
+                display: 'grid',
+                gridTemplateRows: 'repeat(auto-fill, auto)',
+              }}
+            >
+              <AnimatePresence initial={false}>
+                {filteredMessages.map((msg, idx) => {
                   const messageId = getMessageId(msg, idx);
                   const isNewMessage = animatedMessageIds.has(messageId);
                   return (
-                    <ListItem 
-                      sx={{ 
-                        flexDirection: 'column', 
-                        alignItems: 'flex-start', 
-                        py: 1.5,
-                        px: 2,
-                        my: 0.75,
-                        mx: 0.5,
-                        borderRadius: 2,
-                        transition: 'all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1.0)',
-                        animation: isNewMessage ? 
-                          `${glowHighlight} 1.6s ease-in-out, ${slideIn} 0.3s ease-out` : 'none',
-                        backgroundColor: 'transparent',
-                        border: '1px solid transparent',
-                        borderLeft: isNewMessage ? '3px solid rgba(57, 73, 171, 0.4)' : '3px solid transparent',
-                        '&:hover': {
-                          bgcolor: 'rgba(255, 255, 255, 0.05)',
-                          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
-                        }
-                      }}
+                    <motion.div
+                      key={messageId}
+                      variants={messageVariants}
+                      initial="hidden"
+                      animate="visible"
+                      exit="exit"
+                      layout
+                      style={{ overflow: 'hidden' }}
+                    >
+                      {idx > 0 && <Divider />}
+                      <Box sx={{ width: '100%', position: 'relative' }}>
+                        <motion.div
+                          variants={newMessageAnimationVariants}
+                          initial="initial"
+                          animate={isNewMessage ? "animate" : "initial"}
+                          style={{ borderRadius: 8 }}
+                          whileHover={{ 
+                            scale: 1.01, 
+                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                            transition: { duration: 0.2 }
+                          }}
+                        >
+                          <ListItem 
+                            sx={{ 
+                              flexDirection: 'column', 
+                              alignItems: 'flex-start', 
+                              py: 1.5,
+                              px: 2,
+                              my: 0.75,
+                              mx: 0.5,
+                              borderRadius: 2,
+                              border: '1px solid transparent'
+                            }}
                 >
                   <Box sx={{ 
                     width: '100%', 
@@ -968,73 +1104,103 @@ export default function MessageViewer() {
                     </Box>
                   )}
                 </ListItem>
-                  )
-                })()}
-                </Box>
-              </Box>
-            ))}
-          </List>
+                        </motion.div>
+                      </Box>
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
+            </List>
+          </motion.div>
         )}
+        </AnimatePresence>
         </Box>
         
-        {/* New messages indicator */}
-        <Fade in={newMessagesBelowView}>
-          <Box 
-            onClick={() => {
-              if (messageListRef) {
-                messageListRef.scrollTo({
-                  top: messageListRef.scrollHeight,
-                  behavior: 'smooth'
-                });
-                setNewMessagesBelowView(false);
-              }
-            }}
-            sx={{
-              position: 'absolute',
-              bottom: 16,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              bgcolor: 'primary.main',
-              color: 'white',
-              borderRadius: 20,
-              px: 2,
-              py: 1,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1,
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
-              cursor: 'pointer',
-              zIndex: 2,
-              transition: 'transform 0.2s ease',
-              '&:hover': {
-                transform: 'translateX(-50%) translateY(-2px)',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-              },
-              animation: `${keyframes`
-                0%, 100% { transform: translateX(-50%); }
-                5% { transform: translateX(-50%) translateY(-3px); }
-                15% { transform: translateX(-50%) translateY(0); }
-              `} 4s infinite`
-            }}
-          >
-            <Box 
-              component="span" 
-              sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                width: 24, 
-                height: 24,
-                borderRadius: '50%',
-                bgcolor: 'rgba(255, 255, 255, 0.2)',
+        {/* New messages indicator with Framer Motion */}
+        <AnimatePresence>
+          {newMessagesBelowView && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              transition={{
+                type: "spring",
+                stiffness: 500,
+                damping: 30
+              }}
+              style={{
+                position: 'absolute',
+                bottom: 16,
+                left: '50%',
+                translateX: '-50%',
+                zIndex: 2
+              }}
+              onClick={() => {
+                if (messageListRef) {
+                  messageListRef.scrollTo({
+                    top: messageListRef.scrollHeight,
+                    behavior: 'smooth'
+                  });
+                  setNewMessagesBelowView(false);
+                }
               }}
             >
-              ↓
-            </Box>
-            <Typography variant="body2">New messages</Typography>
-          </Box>
-        </Fade>
+              <motion.div
+                whileHover={{ 
+                  scale: 1.05,
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
+                }}
+                whileTap={{ scale: 0.95 }}
+                animate={{ 
+                  y: [0, -5, 0],
+                }}
+                transition={{ 
+                  y: { 
+                    repeat: Infinity,
+                    duration: 2,
+                    repeatType: "mirror",
+                    ease: "easeInOut"
+                  }
+                }}
+                style={{
+                  backgroundColor: '#5C6BC0',
+                  borderRadius: 20,
+                  padding: '8px 16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
+                  cursor: 'pointer',
+                }}
+              >
+                <motion.div
+                  animate={{ y: [0, 3, 0] }}
+                  transition={{
+                    repeat: Infinity,
+                    duration: 1.5,
+                    ease: "easeInOut"
+                  }}
+                  style={{
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    width: 24, 
+                    height: 24,
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  }}
+                >
+                  ↓
+                </motion.div>
+                <Typography variant="body2" sx={{ color: 'white', fontWeight: 500 }}>
+                  New messages
+                </Typography>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </Box>
     </Paper>
+    </motion.div>
   );
 }
