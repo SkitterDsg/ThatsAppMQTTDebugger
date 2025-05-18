@@ -353,6 +353,7 @@ export default function MessageViewer() {
   
   // Track messages for animations
   const messagesIdsRef = useRef<string[]>([]);
+  const prevAutoScroll = useRef(autoScroll);
   const [animatedMessageIds, setAnimatedMessageIds] = useState<Set<string>>(new Set());
 
   // Create a filtered list of messages with duplicate detection
@@ -480,21 +481,31 @@ export default function MessageViewer() {
     };
   }, [messageListRef, autoScroll]);
   
+  // Track previous messages length to detect new additions
+  const prevMessagesLengthRef = useRef(0);
+  
   // Auto-scroll effect with smooth animation
   useEffect(() => {
     if (!messageListRef) return;
     
-    // If messages changed and auto-scroll is on
-    if (autoScroll) {
+    // Check if we've actually added new messages
+    const hasNewMessages = filteredMessages.length > prevMessagesLengthRef.current;
+    prevMessagesLengthRef.current = filteredMessages.length;
+    
+    // Only scroll if we have new messages or if auto-scroll was just enabled
+    if (autoScroll && (hasNewMessages || prevAutoScroll.current !== autoScroll)) {
       // Check if we're already near the bottom to determine if we should smooth scroll
       const isNearBottom = messageListRef.scrollHeight - messageListRef.scrollTop - messageListRef.clientHeight < 100;
       
       if (isNearBottom) {
-        // Use smooth scroll animation for a better experience when new messages arrive
-        messageListRef.scrollTo({
-          top: messageListRef.scrollHeight,
-          behavior: 'smooth'
-        });
+        // Add a small delay to allow for DOM rendering
+        setTimeout(() => {
+          // Use smooth scroll animation for a better experience when new messages arrive
+          messageListRef.scrollTo({
+            top: messageListRef.scrollHeight,
+            behavior: 'smooth'
+          });
+        }, 50);
         setNewMessagesBelowView(false);
       } else {
         // If user has scrolled up significantly but auto-scroll is enabled,
@@ -502,13 +513,16 @@ export default function MessageViewer() {
         messageListRef.scrollTop = messageListRef.scrollHeight;
         setNewMessagesBelowView(false);
       }
-    } else if (filteredMessages.length > 0) {
-      // Auto-scroll is off, indicate new messages might be below
+    } else if (hasNewMessages && filteredMessages.length > 0) {
+      // Auto-scroll is off and we have new messages, indicate they might be below
       const isAtBottom = messageListRef.scrollHeight - messageListRef.scrollTop - messageListRef.clientHeight < 20;
       if (!isAtBottom) {
         setNewMessagesBelowView(true);
       }
     }
+    
+    // Store current auto-scroll value for next comparison
+    prevAutoScroll.current = autoScroll;
   }, [filteredMessages, autoScroll, messageListRef]);
 
   const formatTimestamp = (date: Date) => {
@@ -785,10 +799,21 @@ export default function MessageViewer() {
           <List 
             disablePadding
             sx={{
+              display: 'grid',
+              gridTemplateRows: 'repeat(auto-fill, auto)',
               transition: 'all 0.3s ease',
             }}
+          >
             {filteredMessages.map((msg, idx) => (
-              <Box key={idx}>
+              <Box 
+                key={idx} 
+                sx={{
+                  overflow: 'hidden',
+                  transition: 'transform 0.4s ease, max-height 0.4s ease',
+                  transform: 'translateZ(0)', // Force hardware acceleration
+                  willChange: 'transform, opacity, max-height', // Optimize for animation
+                }}
+              >
                 {idx > 0 && <Divider />}
                 <Box
                   sx={{
