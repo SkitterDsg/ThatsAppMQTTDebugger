@@ -69,7 +69,16 @@ export default function Home() {
           }}
         >
           <Typography variant="body2" color="text.secondary" align="center">
-            {'Made with ❤️ by Doruk for FHNW EMOBA module'}
+            {'Made with ❤️ by Doruk for FHNW EMOBA module'}{' — '}
+            <Link 
+              href="https://github.com/peaktwilight/ThatsAppMQTTDebugger" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              color="inherit"
+              underline="hover"
+            >
+              GitHub
+            </Link>
           </Typography>
         </Box>
       </Box>
