@@ -22,8 +22,7 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import PersonIcon from '@mui/icons-material/Person';
 import KeyboardIcon from '@mui/icons-material/Keyboard';
 import SignalWifiStatusbar4BarIcon from '@mui/icons-material/SignalWifiStatusbar4Bar';
-import WarningIcon from '@mui/icons-material/Warning';
-import CodeIcon from '@mui/icons-material/Code';
+// Removed unused imports
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -59,7 +58,7 @@ function a11yProps(index: number) {
   };
 }
 
-const CodeBlock = ({ children }: { children: string }) => (
+const CodeBlock = ({ children }: { children: React.ReactNode }) => (
   <Box
     component="pre"
     sx={{
@@ -280,7 +279,7 @@ export default function MessageTypesGuide() {
                     <Typography variant="subtitle1">ONLINE_POLL</Typography>
                   </Box>
                   <Typography variant="body2">
-                    Request to check who's online. Payload is a JSON object with name and avatarUrl.
+                    Request to check who&apos;s online. Payload is a JSON object with name and avatarUrl.
                   </Typography>
                   <Chip 
                     label="Global message" 
@@ -316,11 +315,11 @@ export default function MessageTypesGuide() {
               <Box sx={{ mb: 3 }}>
                 <Typography variant="subtitle1" gutterBottom>Global Messages</Typography>
                 <Typography variant="body2" paragraph>
-                  The following message types should use <code>"global"</code> as the <code>recipientId</code> and be sent to the global topic (<code>thatsapp/publictest/global</code>):
+                  The following message types should use <code>&quot;global&quot;</code> as the <code>recipientId</code> and be sent to the global topic (<code>thatsapp/publictest/global</code>):
                 </Typography>
                 <Box sx={{ pl: 2 }}>
                   <Typography variant="body2" component="ul">
-                    <li><strong>ONLINE_POLL</strong>: When asking who's online</li>
+                    <li><strong>ONLINE_POLL</strong>: When asking who&apos;s online</li>
                     <li><strong>ONLINE_RESPONSE</strong>: When responding to an online poll</li>
                   </Typography>
                 </Box>
@@ -381,7 +380,7 @@ val message = Message(
               <Box>
                 <Typography variant="subtitle1" gutterBottom>Direct Messages</Typography>
                 <Typography variant="body2" paragraph>
-                  The following message types should use a specific user's ID as the <code>recipientId</code> and be sent to that user's topic:
+                  The following message types should use a specific user&apos;s ID as the <code>recipientId</code> and be sent to that user&apos;s topic:
                 </Typography>
                 <Box sx={{ pl: 2 }}>
                   <Typography variant="body2" component="ul">
@@ -420,7 +419,7 @@ val message = Message(
                 </Typography>
                 <Box sx={{ pl: 2 }}>
                   <Typography variant="body2" component="ul">
-                    <li>If <code>recipientId</code> is <code>"global"</code>, update contact info but don't add to chat history</li>
+                    <li>If <code>recipientId</code> is <code>&quot;global&quot;</code>, update contact info but don&apos;t add to chat history</li>
                     <li>If <code>recipientId</code> is a specific user ID, update contact info and add to chat history</li>
                   </Typography>
                 </Box>
@@ -433,7 +432,7 @@ val message = Message(
                 </Typography>
                 <Box sx={{ pl: 2 }}>
                   <Typography variant="body2" component="ul">
-                    <li>Check the <code>recipientId</code> field to determine if it's a direct or global request</li>
+                    <li>Check the <code>recipientId</code> field to determine if it&apos;s a direct or global request</li>
                     <li>Respond with the appropriate <code>PROFILE_UPDATE</code> (direct or global)</li>
                     <li>For global requests, only respond if you want to make your profile visible to everyone</li>
                   </Typography>
@@ -497,7 +496,7 @@ val message = Message(
                 <Typography variant="subtitle1" gutterBottom>Direct Message Topics</Typography>
                 <CodeBlock>thatsapp/publictest/{'{recipientId}'}/messages</CodeBlock>
                 <Typography variant="body2">
-                  Used for direct messages between users. The <code>{'{recipientId}'}</code> should be replaced with the actual recipient's ID.
+                  Used for direct messages between users. The <code>{'{recipientId}'}</code> should be replaced with the actual recipient&apos;s ID.
                 </Typography>
               </Box>
             </TabPanel>
