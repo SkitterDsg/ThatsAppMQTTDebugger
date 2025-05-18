@@ -403,13 +403,7 @@ export default function MessageViewer() {
       // Update reference immediately
       messagesIdsRef.current = currentMessageIds;
       
-      // Show "New messages" indicator if auto-scroll is off or user has scrolled up
-      if (messageListRef) {
-        const isNearBottom = messageListRef.scrollHeight - messageListRef.scrollTop - messageListRef.clientHeight < 100;
-        if (!autoScroll || !isNearBottom) {
-          setNewMessagesBelowView(true);
-        }
-      }
+      // We'll handle the "New messages" indicator in the main auto-scroll effect
       
       // Clear animations after they complete
       messagesToAnimate.forEach(id => {
@@ -462,7 +456,24 @@ export default function MessageViewer() {
     const hasNewMessages = filteredMessages.length > prevMessagesLengthRef.current;
     prevMessagesLengthRef.current = filteredMessages.length;
     
-    // Only scroll if we have new messages or if auto-scroll was just enabled
+    // Always check if container is actually scrollable
+    const isScrollable = messageListRef.scrollHeight > messageListRef.clientHeight;
+    
+    // Update new messages below view indicator state
+    if (!isScrollable) {
+      // If container is not scrollable, never show the indicator
+      setNewMessagesBelowView(false);
+    } else if (autoScroll) {
+      // If auto-scroll is on, indicator should be off
+      setNewMessagesBelowView(false);
+    } else if (hasNewMessages) {
+      // Auto-scroll is off and we have new messages, check if we're at the bottom
+      const isAtBottom = messageListRef.scrollHeight - messageListRef.scrollTop - messageListRef.clientHeight < 20;
+      // Only show indicator if not at the bottom
+      setNewMessagesBelowView(!isAtBottom);
+    }
+    
+    // Handle scrolling when appropriate
     if (autoScroll && (hasNewMessages || prevAutoScroll.current !== autoScroll)) {
       // Check if we're already near the bottom to determine if we should smooth scroll
       const isNearBottom = messageListRef.scrollHeight - messageListRef.scrollTop - messageListRef.clientHeight < 100;
@@ -476,18 +487,10 @@ export default function MessageViewer() {
             behavior: 'smooth'
           });
         }, 50);
-        setNewMessagesBelowView(false);
       } else {
         // If user has scrolled up significantly but auto-scroll is enabled,
         // just update position instantly
         messageListRef.scrollTop = messageListRef.scrollHeight;
-        setNewMessagesBelowView(false);
-      }
-    } else if (hasNewMessages && filteredMessages.length > 0) {
-      // Auto-scroll is off and we have new messages, indicate they might be below
-      const isAtBottom = messageListRef.scrollHeight - messageListRef.scrollTop - messageListRef.clientHeight < 20;
-      if (!isAtBottom) {
-        setNewMessagesBelowView(true);
       }
     }
     
