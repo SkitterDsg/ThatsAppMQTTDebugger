@@ -52,6 +52,7 @@ const theme = createTheme({
         root: {
           backgroundColor: '#3949AB',
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+          borderRadius: 0,
         },
       },
     },

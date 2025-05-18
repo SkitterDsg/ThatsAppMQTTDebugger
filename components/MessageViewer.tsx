@@ -314,31 +314,27 @@ const MessageContent = ({ message }: { message: string }) => {
 
 const glowHighlight = keyframes`
   0% {
-    background-color: rgba(57, 73, 171, 0.1);
-    box-shadow: 0 0 2px rgba(57, 73, 171, 0.3);
-    transform: translateY(0px);
+    background-color: rgba(57, 73, 171, 0);
+    border-left-color: rgba(57, 73, 171, 0);
   }
-  30% {
-    background-color: rgba(57, 73, 171, 0.2);
-    box-shadow: 0 0 10px rgba(57, 73, 171, 0.5);
-    transform: translateY(-2px);
+  20% {
+    background-color: rgba(57, 73, 171, 0.05);
+    border-left-color: rgba(57, 73, 171, 0.4);
   }
-  60% {
-    background-color: rgba(57, 73, 171, 0.15);
-    box-shadow: 0 0 6px rgba(57, 73, 171, 0.3);
-    transform: translateY(-1px);
+  80% {
+    background-color: rgba(57, 73, 171, 0.02);
+    border-left-color: rgba(57, 73, 171, 0.2);
   }
   100% {
     background-color: rgba(0, 0, 0, 0);
-    box-shadow: none;
-    transform: translateY(0px);
+    border-left-color: rgba(0, 0, 0, 0);
   }
 `;
 
 const slideIn = keyframes`
   from {
     opacity: 0;
-    transform: translateY(-20px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -353,10 +349,11 @@ export default function MessageViewer() {
   const [autoScroll, setAutoScroll] = useState(true);
   const [filterDuplicates, setFilterDuplicates] = useState(true);
   const [messageListRef, setMessageListRef] = useState<HTMLDivElement | null>(null);
+  const [newMessagesBelowView, setNewMessagesBelowView] = useState(false);
   
   // Track messages for animations
-  const prevMessagesLengthRef = useRef(0);
-  const [newMessageIndex, setNewMessageIndex] = useState<number | null>(null);
+  const messagesIdsRef = useRef<string[]>([]);
+  const [animatedMessageIds, setAnimatedMessageIds] = useState<Set<string>>(new Set());
 
   // Create a filtered list of messages with duplicate detection
   const filteredMessages = useMemo(() => {
@@ -391,48 +388,126 @@ export default function MessageViewer() {
       });
     }
     
+    // For performance, limit the number of messages shown if there are too many
+    // This prevents performance degradation with large message volumes
+    const MAX_DISPLAY_MESSAGES = 150;
+    if (filtered.length > MAX_DISPLAY_MESSAGES) {
+      filtered = filtered.slice(0, MAX_DISPLAY_MESSAGES);
+    }
+    
     return filtered;
   }, [messages, filter, filterDuplicates]);
 
+  // Generate unique IDs for messages to track them better
+  const getMessageId = (msg: any, index: number) => {
+    return `${msg.topic}-${msg.timestamp.getTime()}-${index}`;
+  };
+  
   // Effect to detect new messages for animation
   useEffect(() => {
-    if (messages.length > prevMessagesLengthRef.current) {
-      // New message received - set its index for animation
-      setNewMessageIndex(0); // Always animate the newest message (first in the list)
-      
-      // Clear the animation after 2000ms (longer duration for more visibility)
-      const timer = setTimeout(() => {
-        setNewMessageIndex(null);
-      }, 2000);
-      
-      return () => clearTimeout(timer);
+    if (messages.length === 0) {
+      // Reset tracking when all messages are cleared
+      messagesIdsRef.current = [];
+      setAnimatedMessageIds(new Set());
+      return;
     }
     
-    prevMessagesLengthRef.current = messages.length;
-  }, [messages.length]);
-  
-  // Additional effect for animation when message count changes at all
-  useEffect(() => {
-    // This ensures animations work even with filtered messages
-    if (filteredMessages.length > 0) {
-      // Force re-render with a small delay to ensure animation triggers
-      const timer = setTimeout(() => {
-        setNewMessageIndex(0);
-        
-        // Clear the animation after a short period
-        setTimeout(() => {
-          setNewMessageIndex(null);
-        }, 2000);
-      }, 100);
+    // Generate IDs for current messages
+    const currentMessageIds = messages.map(getMessageId);
+    
+    // Check if we have new messages by comparing current with previous
+    const newMessages = currentMessageIds.filter(id => !messagesIdsRef.current.includes(id));
+    
+    if (newMessages.length > 0) {
+      // Performance optimization: only animate up to 5 newest messages if there are many
+      const messagesToAnimate = newMessages.length > 5 ? newMessages.slice(0, 5) : newMessages;
       
-      return () => clearTimeout(timer);
+      // Add the new messages to animatedMessageIds
+      setAnimatedMessageIds(prev => {
+        const updated = new Set(prev);
+        messagesToAnimate.forEach(id => updated.add(id));
+        return updated;
+      });
+      
+      // Update reference immediately
+      messagesIdsRef.current = currentMessageIds;
+      
+      // Show "New messages" indicator if auto-scroll is off or user has scrolled up
+      if (messageListRef) {
+        const isNearBottom = messageListRef.scrollHeight - messageListRef.scrollTop - messageListRef.clientHeight < 100;
+        if (!autoScroll || !isNearBottom) {
+          setNewMessagesBelowView(true);
+        }
+      }
+      
+      // Clear animations after they complete
+      messagesToAnimate.forEach(id => {
+        setTimeout(() => {
+          setAnimatedMessageIds(prev => {
+            const updated = new Set(prev);
+            updated.delete(id);
+            return updated;
+          });
+        }, 1600);
+      });
+    } else {
+      // Update the reference if no new messages
+      messagesIdsRef.current = currentMessageIds;
     }
-  }, [filteredMessages.length]);
+  }, [messages, messageListRef, autoScroll]);
+  
+  // We no longer need the effect to find index in filtered list
+  // since we now track message IDs directly
 
-  // Auto-scroll effect
+  // Set up scroll listener to detect when we're not at the bottom
   useEffect(() => {
-    if (autoScroll && messageListRef) {
-      messageListRef.scrollTop = messageListRef.scrollHeight;
+    if (!messageListRef) return;
+    
+    const handleScroll = () => {
+      if (!messageListRef) return;
+      
+      const isNearBottom = messageListRef.scrollHeight - messageListRef.scrollTop - messageListRef.clientHeight < 100;
+      
+      // If auto-scroll is off and we're not at the bottom, we might need to show the new message indicator
+      if (!autoScroll || !isNearBottom) {
+        setNewMessagesBelowView(false); // Reset it first (will be set to true if new messages arrive)
+      }
+    };
+    
+    messageListRef.addEventListener('scroll', handleScroll);
+    return () => {
+      messageListRef.removeEventListener('scroll', handleScroll);
+    };
+  }, [messageListRef, autoScroll]);
+  
+  // Auto-scroll effect with smooth animation
+  useEffect(() => {
+    if (!messageListRef) return;
+    
+    // If messages changed and auto-scroll is on
+    if (autoScroll) {
+      // Check if we're already near the bottom to determine if we should smooth scroll
+      const isNearBottom = messageListRef.scrollHeight - messageListRef.scrollTop - messageListRef.clientHeight < 100;
+      
+      if (isNearBottom) {
+        // Use smooth scroll animation for a better experience when new messages arrive
+        messageListRef.scrollTo({
+          top: messageListRef.scrollHeight,
+          behavior: 'smooth'
+        });
+        setNewMessagesBelowView(false);
+      } else {
+        // If user has scrolled up significantly but auto-scroll is enabled,
+        // just update position instantly
+        messageListRef.scrollTop = messageListRef.scrollHeight;
+        setNewMessagesBelowView(false);
+      }
+    } else if (filteredMessages.length > 0) {
+      // Auto-scroll is off, indicate new messages might be below
+      const isAtBottom = messageListRef.scrollHeight - messageListRef.scrollTop - messageListRef.clientHeight < 20;
+      if (!isAtBottom) {
+        setNewMessagesBelowView(true);
+      }
     }
   }, [filteredMessages, autoScroll, messageListRef]);
 
@@ -653,18 +728,21 @@ export default function MessageViewer() {
         </Box>
       </Collapse>
 
-      <Box 
-        ref={setMessageListRef}
-        sx={{ 
-          flexGrow: 1,
-          maxHeight: '700px',
-          overflowY: 'auto', 
-          border: '1px solid rgba(255, 255, 255, 0.08)', 
-          borderRadius: 2,
-          bgcolor: 'rgba(0, 0, 0, 0.2)',
-          backdropFilter: 'blur(4px)',
-          boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.1)'
-        }}
+      <Box sx={{ position: 'relative', flexGrow: 1 }}>
+        <Box 
+          ref={setMessageListRef}
+          sx={{ 
+            height: '100%',
+            maxHeight: '700px',
+            overflowY: 'auto', 
+            border: '1px solid rgba(255, 255, 255, 0.08)', 
+            borderRadius: 2,
+            bgcolor: 'rgba(0, 0, 0, 0.2)',
+            backdropFilter: 'blur(4px)',
+            boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.1)',
+            // Add CSS containment for performance optimization
+            contain: 'content'
+          }}
       >
         {filteredMessages.length === 0 ? (
           <Fade in={true} timeout={500}>
@@ -704,35 +782,45 @@ export default function MessageViewer() {
             </Box>
           </Fade>
         ) : (
-          <List disablePadding>
+          <List 
+            disablePadding
+            sx={{
+              transition: 'all 0.3s ease',
+            }}
             {filteredMessages.map((msg, idx) => (
               <Box key={idx}>
                 {idx > 0 && <Divider />}
                 <Box
                   sx={{
-                    animation: idx === 0 ? `${slideIn} 0.4s ease` : 'none',
-                    width: '100%'
+                    width: '100%',
+                    position: 'relative'
                   }}
                 >
-                <ListItem 
-                  sx={{ 
-                    flexDirection: 'column', 
-                    alignItems: 'flex-start', 
-                    py: 1.5,
-                    px: 2,
-                    my: 0.75,
-                    mx: 0.5,
-                    borderRadius: 2,
-                    transition: 'all 0.2s ease',
-                    animation: idx === newMessageIndex ? 
-                      `${glowHighlight} 2s ease` : 'none',
-                    backgroundColor: idx === newMessageIndex ? 
-                      'rgba(57, 73, 171, 0.08)' : 'transparent',
-                    '&:hover': {
-                      bgcolor: 'rgba(255, 255, 255, 0.05)',
-                      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
-                    }
-                  }}
+                {/* Get message ID to check if it's being animated */}
+                {(() => {
+                  const messageId = getMessageId(msg, idx);
+                  const isNewMessage = animatedMessageIds.has(messageId);
+                  return (
+                    <ListItem 
+                      sx={{ 
+                        flexDirection: 'column', 
+                        alignItems: 'flex-start', 
+                        py: 1.5,
+                        px: 2,
+                        my: 0.75,
+                        mx: 0.5,
+                        borderRadius: 2,
+                        transition: 'all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1.0)',
+                        animation: isNewMessage ? 
+                          `${glowHighlight} 1.6s ease-in-out, ${slideIn} 0.3s ease-out` : 'none',
+                        backgroundColor: 'transparent',
+                        border: '1px solid transparent',
+                        borderLeft: isNewMessage ? '3px solid rgba(57, 73, 171, 0.4)' : '3px solid transparent',
+                        '&:hover': {
+                          bgcolor: 'rgba(255, 255, 255, 0.05)',
+                          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+                        }
+                      }}
                 >
                   <Box sx={{ 
                     width: '100%', 
@@ -855,11 +943,72 @@ export default function MessageViewer() {
                     </Box>
                   )}
                 </ListItem>
+                  )
+                })()}
                 </Box>
               </Box>
             ))}
           </List>
         )}
+        </Box>
+        
+        {/* New messages indicator */}
+        <Fade in={newMessagesBelowView}>
+          <Box 
+            onClick={() => {
+              if (messageListRef) {
+                messageListRef.scrollTo({
+                  top: messageListRef.scrollHeight,
+                  behavior: 'smooth'
+                });
+                setNewMessagesBelowView(false);
+              }
+            }}
+            sx={{
+              position: 'absolute',
+              bottom: 16,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              bgcolor: 'primary.main',
+              color: 'white',
+              borderRadius: 20,
+              px: 2,
+              py: 1,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
+              cursor: 'pointer',
+              zIndex: 2,
+              transition: 'transform 0.2s ease',
+              '&:hover': {
+                transform: 'translateX(-50%) translateY(-2px)',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+              },
+              animation: `${keyframes`
+                0%, 100% { transform: translateX(-50%); }
+                5% { transform: translateX(-50%) translateY(-3px); }
+                15% { transform: translateX(-50%) translateY(0); }
+              `} 4s infinite`
+            }}
+          >
+            <Box 
+              component="span" 
+              sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                width: 24, 
+                height: 24,
+                borderRadius: '50%',
+                bgcolor: 'rgba(255, 255, 255, 0.2)',
+              }}
+            >
+              ↓
+            </Box>
+            <Typography variant="body2">New messages</Typography>
+          </Box>
+        </Fade>
       </Box>
     </Paper>
   );
