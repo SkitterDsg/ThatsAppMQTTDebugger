@@ -19,7 +19,7 @@
   "description": "MQTT client debugger for ThatsApp - an open source tool for debugging MQTT messages",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/thatsapp-mqtt-debugger"
+    "url": "https://github.com/peaktwilight/ThatsAppMQTTDebugger"
   },
   "engines": {
     "node": ">=18.x"
@@ -43,5 +43,9 @@
     ">0.3%",
     "not dead",
     "not op_mini all"
-  ]
+  ],
+  "devDependencies": {
+    "eslint": "^9.27.0",
+    "eslint-config-next": "^15.3.2"
+  }
 }

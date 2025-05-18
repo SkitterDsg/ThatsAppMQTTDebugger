@@ -18,6 +18,9 @@ jobs:
         node-version: '20.x'
         cache: 'npm'
     - run: npm ci
-    - run: npm run lint --if-present
+    - name: Lint
+      run: npm run lint
+      env:
+        NEXT_TELEMETRY_DISABLED: 1
     
     # Note: We're skipping the build step as Vercel handles deployment
