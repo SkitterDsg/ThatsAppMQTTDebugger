@@ -16,6 +16,14 @@ const MessageTypesGuide = dynamic(() => import('../components/MessageTypesGuide'
 export default function Home() {
   const { isConnected, subscribe } = useMQTT();
   const [hasInitialSubscribed, setHasInitialSubscribed] = useState(false);
+  const [showConnectGuide, setShowConnectGuide] = useState(true);
+
+  // Hide the connect guide when connected
+  useEffect(() => {
+    if (isConnected) {
+      setShowConnectGuide(false);
+    }
+  }, [isConnected]);
 
   // Auto-subscribe to default topic only on first connection
   useEffect(() => {
@@ -80,20 +88,89 @@ export default function Home() {
                 maxWidth: { md: '450px' },
                 transition: 'all 0.3s ease'
               }}>
-                <Stack 
-                  spacing={3} 
-                  component={motion.div}
-                  initial="hidden"
-                  animate="visible"
-                  variants={{
-                    hidden: {},
-                    visible: {},
-                  }}
-                >
-                  <ConnectionForm />
-                  <TopicSubscriber />
-                  <MessagePublisher />
-                </Stack>
+                <Box sx={{ position: 'relative' }}>
+                  <Stack 
+                    spacing={3} 
+                    component={motion.div}
+                    initial="hidden"
+                    animate="visible"
+                    variants={{
+                      hidden: {},
+                      visible: {},
+                    }}
+                    position="relative"
+                  >
+                    <Box position="relative">
+                      <ConnectionForm />
+                      
+                      {showConnectGuide && (
+                        <Box
+                          component={motion.div}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ 
+                            opacity: 1, 
+                            y: 0,
+                            transition: { 
+                              delay: 0.5, 
+                              duration: 0.5
+                            }
+                          }}
+                          sx={{
+                            position: 'absolute',
+                            bottom: '-90px', // Position between ConnectionForm and TopicSubscriber with extra space
+                            left: '40px', // Aligned with the Connect button
+                            zIndex: 50,
+                            width: '100%',
+                            maxWidth: 280,
+                            textAlign: 'center',
+                          }}
+                        >
+                          <motion.div
+                            animate={{ 
+                              y: [0, 8, 0],
+                            }}
+                            transition={{ 
+                              repeat: Infinity,
+                              repeatType: "reverse",
+                              duration: 1.5,
+                              ease: "easeInOut"
+                            }}
+                          >
+                            <Box sx={{
+                              position: 'relative'
+                            }}>
+                              <Box sx={{
+                                fontSize: '24px',
+                                color: 'primary.main',
+                                position: 'absolute',
+                                top: '-40px', // Position arrow higher above the text
+                                left: '20px' // Position arrow to the left
+                              }}>
+                                ↑
+                              </Box>
+                              <Box sx={{
+                                background: 'linear-gradient(135deg, rgba(57, 73, 171, 0.9) 0%, rgba(48, 63, 159, 0.95) 100%)',
+                                boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.15), 0 4px 12px rgba(0, 0, 0, 0.3)',
+                                borderRadius: 2,
+                                p: 2
+                              }}>
+                                <Typography variant="body2" sx={{ 
+                                  fontWeight: 500,
+                                  color: 'white'
+                                }}>
+                                  Click Connect to begin debugging
+                                </Typography>
+                              </Box>
+                            </Box>
+                          </motion.div>
+                        </Box>
+                      )}
+                    </Box>
+                    
+                    <TopicSubscriber />
+                    <MessagePublisher />
+                  </Stack>
+                </Box>
               </Box>
               <Box sx={{ 
                 flex: 1.5, 
