@@ -106,7 +106,8 @@ export default function MessagePublisher() {
       transition: {
         when: "beforeChildren",
         staggerChildren: 0.1,
-        duration: 0.5
+        duration: 0.3,
+        delayChildren: 0.3 // Add a delay for the third component
       }
     }
   };

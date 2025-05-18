@@ -1,4 +1,5 @@
 import { Box, Container, Typography, AppBar, Toolbar, Link, Stack } from '@mui/material';
+import { motion } from 'framer-motion';
 import Head from 'next/head';
 import dynamic from 'next/dynamic';
 import { useEffect } from 'react';
@@ -75,7 +76,16 @@ export default function Home() {
                 maxWidth: { md: '450px' },
                 transition: 'all 0.3s ease'
               }}>
-                <Stack spacing={3}>
+                <Stack 
+                  spacing={3} 
+                  component={motion.div}
+                  initial="hidden"
+                  animate="visible"
+                  variants={{
+                    hidden: {},
+                    visible: {},
+                  }}
+                >
                   <ConnectionForm />
                   <TopicSubscriber />
                   <MessagePublisher />

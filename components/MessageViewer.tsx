@@ -314,7 +314,7 @@ export default function MessageViewer() {
   const { messages, clearMessages } = useMQTT();
   const [filter, setFilter] = useState('');
   const [showFilters, setShowFilters] = useState(false);
-  const [autoScroll, setAutoScroll] = useState(false);
+  const [autoScroll, setAutoScroll] = useState(true);
   const [filterDuplicates, setFilterDuplicates] = useState(true);
   const [messageListRef, setMessageListRef] = useState<HTMLDivElement | null>(null);
   const [newMessagesBelowView, setNewMessagesBelowView] = useState(false);
@@ -591,8 +591,9 @@ export default function MessageViewer() {
     visible: {
       opacity: 1,
       transition: {
-        duration: 0.5,
-        when: "beforeChildren"
+        duration: 0.3,
+        when: "beforeChildren",
+        delayChildren: 0.4 // Add a delay for the fourth component
       }
     }
   };
@@ -671,7 +672,7 @@ export default function MessageViewer() {
           flexDirection: 'column',
           backgroundColor: 'rgba(30, 30, 36, 0.6)',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-          borderRadius: 3,
+          borderRadius: 2,
           backdropFilter: "blur(10px)"
         }}
       >

@@ -37,7 +37,8 @@ export default function TopicSubscriber() {
       transition: {
         when: "beforeChildren",
         staggerChildren: 0.1,
-        duration: 0.3
+        duration: 0.3,
+        delayChildren: 0.2 // Add a slight delay for the second component
       }
     }
   };
@@ -118,7 +119,7 @@ export default function TopicSubscriber() {
             sx={{ 
               fontWeight: 600, 
               mb: 2,
-              color: "primary.light"
+              color: "primary.main"
             }}
           >
             Topic Subscriptions

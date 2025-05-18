@@ -23,9 +23,10 @@ export default function ConnectionForm() {
     visible: {
       opacity: 1,
       transition: {
-        duration: 0.5,
+        duration: 0.3,
         when: "beforeChildren",
-        staggerChildren: 0.1
+        staggerChildren: 0.1,
+        delayChildren: 0.1
       }
     }
   };
@@ -35,7 +36,7 @@ export default function ConnectionForm() {
     visible: {
       y: 0,
       opacity: 1,
-      transition: { type: "spring", stiffness: 300, damping: 24 }
+      transition: { type: "spring", stiffness: 300, damping: 25 }
     }
   };
 
@@ -86,7 +87,14 @@ export default function ConnectionForm() {
         }}
       >
         <motion.div variants={itemVariants}>
-          <Typography variant="h6" gutterBottom>
+          <Typography 
+            variant="h6" 
+            sx={{ 
+              fontWeight: 600,
+              mb: 2,
+              color: "primary.main"
+            }}
+          >
             MQTT Connection
           </Typography>
         </motion.div>
