@@ -5,8 +5,6 @@ import {
   Paper, 
   Typography, 
   Box,
-  FormControlLabel,
-  Switch,
   MenuItem,
   Select,
   FormControl,
@@ -32,7 +30,6 @@ export default function MessagePublisher() {
   const { publish, isConnected } = useMQTT();
   const [topic, setTopic] = useState('thatsapp/publictest/recipient/messages');
   const [message, setMessage] = useState('');
-  const [isJsonMessage, setIsJsonMessage] = useState(true);
   const [jsonError, setJsonError] = useState('');
   const [messageType, setMessageType] = useState('text');
   const [senderId, setSenderId] = useState('debugger');
@@ -81,18 +78,14 @@ export default function MessagePublisher() {
 
   const handlePublish = () => {
     if (topic.trim() && message.trim()) {
-      if (isJsonMessage) {
-        try {
-          // Validate JSON
-          JSON.parse(message);
-          setJsonError('');
-          publish(topic, message);
-        } catch (_) {
-          setJsonError('Invalid JSON format');
-          return;
-        }
-      } else {
+      try {
+        // Validate JSON
+        JSON.parse(message);
+        setJsonError('');
         publish(topic, message);
+      } catch (_) {
+        setJsonError('Invalid JSON format');
+        return;
       }
     }
   };
@@ -256,38 +249,17 @@ export default function MessagePublisher() {
             />
           </motion.div>
           
-          <Box
-            component={motion.div}
-            variants={itemVariants}
-            sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-          >
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={isJsonMessage}
-                  onChange={(e) => setIsJsonMessage(e.target.checked)}
-                  color="primary"
-                  size="small"
-                />
-              }
-              label={
-                <Typography variant="body2" sx={{ fontSize: '0.85rem', ml: 0.5 }}>
-                  Format as JSON
-                </Typography>
-              }
-              sx={{ my: 0 }}
-            />
-          </Box>
+          {/* JSON format is always required - removed switch */}
+          <Box sx={{ height: 8 }} />
 
           <AnimatePresence>
-            {isJsonMessage && (
-              <motion.div
-                key="json-template-controls"
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-                variants={templateVariants}
-              >
+            <motion.div
+              key="json-template-controls"
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              variants={templateVariants}
+            >
                 <Box sx={{ mb: 3, mt: 3 }}>
                   <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600, mt: 0, mb: 2 }}>
                     ThatsApp Message Templates
@@ -366,7 +338,6 @@ export default function MessagePublisher() {
                   <Divider sx={{ mb: 3 }} />
                 </Box>
               </motion.div>
-            )}
           </AnimatePresence>
           
           <motion.div variants={itemVariants}>
@@ -377,13 +348,11 @@ export default function MessagePublisher() {
               value={message}
               onChange={(e) => {
                 setMessage(e.target.value);
-                if (isJsonMessage) {
-                  try {
-                    JSON.parse(e.target.value);
-                    setJsonError('');
-                  } catch (_) {
-                    setJsonError('Invalid JSON format');
-                  }
+                try {
+                  JSON.parse(e.target.value);
+                  setJsonError('');
+                } catch (_) {
+                  setJsonError('Invalid JSON format');
                 }
               }}
               disabled={!isConnected}

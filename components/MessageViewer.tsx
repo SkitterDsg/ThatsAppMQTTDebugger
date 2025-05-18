@@ -276,24 +276,45 @@ const MessageContent = ({ message }: { message: string }) => {
       }
     };
     
-    // Render the toggle button and content with animation
+    // Render the content with animation, making the entire area clickable
     return (
-      <>
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
-          <Button 
-            size="small" 
-            variant="text" 
-            onClick={() => setShowRawJson(!showRawJson)}
-            sx={{ 
-              fontSize: '0.75rem',
-              color: 'primary.main',
-              '&:hover': {
-                backgroundColor: 'rgba(92, 107, 192, 0.12)'
-              }
-            }}
-          >
-            {showRawJson ? 'Show Formatted View' : 'View Raw JSON'}
-          </Button>
+      <Box 
+        sx={{ 
+          position: 'relative',
+          cursor: 'pointer',
+          '&:hover': {
+            '&::after': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(255, 255, 255, 0.03)',
+              borderRadius: 1,
+              pointerEvents: 'none' // Ensures clicks go through to the underlying content
+            }
+          }
+        }}
+        onClick={() => setShowRawJson(!showRawJson)}
+      >
+        {/* Small indicator in top-right corner */}
+        <Box 
+          sx={{ 
+            position: 'absolute', 
+            top: 0, 
+            right: 0, 
+            py: 0.5,
+            px: 1,
+            borderRadius: '0 0 0 4px',
+            bgcolor: 'rgba(0, 0, 0, 0.2)',
+            fontSize: '0.6rem',
+            color: 'rgba(255, 255, 255, 0.7)',
+            zIndex: 1,
+            pointerEvents: 'none' // Ensures clicks go through to the underlying content
+          }}
+        >
+          {showRawJson ? 'Raw JSON' : 'Formatted'}
         </Box>
         
         <AnimatePresence mode="wait" initial={false}>
@@ -315,7 +336,7 @@ const MessageContent = ({ message }: { message: string }) => {
                   margin: 0,
                   bgcolor: 'rgba(0, 0, 0, 0.1)',
                   p: 1.5,
-                  borderRadius: 1.5,
+                  borderRadius: 1,
                   border: '1px solid rgba(255, 255, 255, 0.05)',
                   boxShadow: 'inset 0 1px 2px rgba(0, 0, 0, 0.1)'
                 }}
@@ -335,7 +356,7 @@ const MessageContent = ({ message }: { message: string }) => {
             </motion.div>
           )}
         </AnimatePresence>
-      </>
+      </Box>
     );
   } catch (_) {
     // Fallback for parsing errors
