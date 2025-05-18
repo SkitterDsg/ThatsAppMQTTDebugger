@@ -2,7 +2,7 @@
 
 A feature-rich MQTT debugging tool designed specifically for ThatsApp messaging protocol development and testing. This web-based application allows you to easily connect to MQTT brokers, subscribe to topics, publish messages, and monitor real-time communication.
 
-![ThatsApp MQTT Debugger](public/thatsapp.png)
+![ThatsApp MQTT Debugger](public/MQTT.png)
 
 ## 🔗 Live Demo
 
