@@ -36,8 +36,8 @@ export default function Home() {
 
       <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         <AppBar position="static" elevation={1} sx={{ 
-          background: 'rgba(30, 30, 36, 0.8)',
-          backdropFilter: 'blur(10px)'
+          background: 'linear-gradient(135deg, rgba(25, 28, 45, 0.85) 0%, rgba(20, 22, 33, 0.95) 100%)',
+          boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.07), 0 2px 10px rgba(0, 0, 0, 0.2)'
         }}>
           <Container maxWidth="xl">
             <Toolbar disableGutters sx={{ 
@@ -113,8 +113,8 @@ export default function Home() {
             py: 1.5, 
             mt: 3,
             borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-            backdropFilter: 'blur(10px)',
-            bgcolor: 'rgba(30, 30, 36, 0.8)'
+            background: 'linear-gradient(135deg, rgba(25, 28, 45, 0.85) 0%, rgba(20, 22, 33, 0.95) 100%)',
+            boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.05), 0 -4px 8px rgba(0, 0, 0, 0.15)'
           }}
         >
           <Container maxWidth="xl">

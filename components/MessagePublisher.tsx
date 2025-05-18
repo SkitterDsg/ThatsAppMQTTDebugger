@@ -163,21 +163,77 @@ export default function MessagePublisher() {
         sx={{ 
           p: 3, 
           borderRadius: 2,
-          boxShadow: "0 10px 30px rgba(0, 0, 0, 0.1)",
-          backdropFilter: "blur(10px)",
-          overflow: "hidden" // Important for animations
+          background: 'linear-gradient(135deg, rgba(28, 32, 50, 0.6) 0%, rgba(18, 20, 30, 0.75) 100%)',
+          boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 10px 30px rgba(0, 0, 0, 0.25)',
+          overflow: "hidden", // Important for animations
+          opacity: isConnected ? 1 : 0.7,
+          position: 'relative'
         }}
       >
+        {!isConnected && (
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'linear-gradient(135deg, rgba(15, 18, 35, 0.9) 0%, rgba(10, 12, 20, 0.95) 100%)',
+              boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.05)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 10,
+              borderRadius: 2,
+            }}
+          >
+            <Typography 
+              variant="subtitle1" 
+              sx={{ 
+                fontWeight: 600,
+                color: 'rgba(255, 255, 255, 0.9)',
+                px: 3,
+                py: 1,
+                borderRadius: 1,
+                background: 'linear-gradient(135deg, rgba(30, 34, 65, 0.85) 0%, rgba(25, 28, 50, 0.95) 100%)',
+                boxShadow: '0 3px 10px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.1)',
+              }}
+            >
+              Connect to MQTT to publish messages
+            </Typography>
+          </Box>
+        )}
         <motion.div variants={itemVariants}>
           <Typography 
             variant="h6" 
             sx={{ 
               fontWeight: 600,
               mb: 2,
-              color: "primary.main"
+              color: "primary.main",
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1
             }}
           >
             Publish Message
+            {isConnected && (
+              <Box 
+                sx={{ 
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  fontSize: '0.7rem',
+                  fontWeight: 600,
+                  ml: 1.5,
+                  px: 1,
+                  py: 0.5,
+                  borderRadius: '10px',
+                  bgcolor: 'success.main',
+                  color: 'success.contrastText',
+                }}
+              >
+                UNLOCKED
+              </Box>
+            )}
           </Typography>
         </motion.div>
 

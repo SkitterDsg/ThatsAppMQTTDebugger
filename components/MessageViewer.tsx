@@ -670,10 +670,9 @@ export default function MessageViewer() {
           height: '100%', 
           display: 'flex', 
           flexDirection: 'column',
-          backgroundColor: 'rgba(30, 30, 36, 0.6)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-          borderRadius: 2,
-          backdropFilter: "blur(10px)"
+          background: 'linear-gradient(135deg, rgba(28, 32, 50, 0.6) 0%, rgba(18, 20, 30, 0.75) 100%)',
+          boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 8px 32px rgba(0, 0, 0, 0.25)',
+          borderRadius: 2
         }}
       >
       <Box sx={{ 
@@ -833,9 +832,8 @@ export default function MessageViewer() {
             overflowX: 'hidden',
             border: '1px solid rgba(255, 255, 255, 0.08)', 
             borderRadius: 2,
-            bgcolor: 'rgba(0, 0, 0, 0.2)',
-            backdropFilter: 'blur(4px)',
-            boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.1)',
+            background: 'linear-gradient(135deg, rgba(10, 12, 22, 0.6) 0%, rgba(15, 17, 26, 0.4) 100%)',
+            boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.05), inset 0 2px 4px rgba(0, 0, 0, 0.1)',
             // Add CSS containment for performance optimization
             contain: 'content'
           }}
