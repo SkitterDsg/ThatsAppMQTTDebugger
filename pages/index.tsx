@@ -81,6 +81,9 @@ export default function Home() {
               Paho MQTT
             </Link>
           </Typography>
+          <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 0.5 }}>
+            {'Made with ❤️ by Doruk for FHNW EMOBA module'}
+          </Typography>
         </Box>
       </Box>
     </>
