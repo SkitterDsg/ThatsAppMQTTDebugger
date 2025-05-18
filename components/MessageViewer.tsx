@@ -32,44 +32,55 @@ import { useMQTT } from '../contexts/MQTTContext';
 const MessageContent = ({ message }: { message: string }) => {
   const [showRawJson, setShowRawJson] = useState(false);
   
+  // Define animation variants for JSON view
+  const jsonViewVariants = {
+    hidden: { 
+      height: 0,
+      opacity: 0,
+      overflow: 'hidden'
+    },
+    visible: { 
+      height: 'auto',
+      opacity: 1,
+      transition: {
+        height: { type: 'spring', stiffness: 300, damping: 30 },
+        opacity: { duration: 0.2, delay: 0.1 }
+      }
+    },
+    exit: {
+      height: 0,
+      opacity: 0,
+      transition: {
+        height: { duration: 0.2 },
+        opacity: { duration: 0.1 }
+      }
+    }
+  };
+  
   try {
     const parsed = JSON.parse(message);
     
-    // Raw JSON view toggle for all message types
-    if (showRawJson) {
-      return (
-        <>
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
-            <Button 
-              size="small" 
-              variant="text" 
-              onClick={() => setShowRawJson(false)}
-              sx={{ fontSize: '0.75rem' }}
-            >
-              Show Formatted View
-            </Button>
-          </Box>
-          <Box 
-            component="pre" 
-            sx={{ 
-              fontSize: '0.85rem',
-              fontFamily: 'monospace',
-              whiteSpace: 'pre-wrap',
-              wordBreak: 'break-word',
-              margin: 0,
-              bgcolor: 'rgba(0, 0, 0, 0.1)',
-              p: 1,
-              borderRadius: 1
-            }}
-          >
-            {JSON.stringify(parsed, null, 2)}
-          </Box>
-        </>
-      );
-    }
+    // Common message metadata display
+    const MessageMeta = () => (
+      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box sx={{ opacity: 0.7 }}>
+          <Typography variant="caption" sx={{ mr: 2 }}>
+            <strong>From:</strong> {parsed.senderId}
+          </Typography>
+          {parsed.recipientId && (
+            <Typography variant="caption" sx={{ mr: 2 }}>
+              <strong>To:</strong> {parsed.recipientId}
+            </Typography>
+          )}
+          <Typography variant="caption">
+            <strong>Time:</strong> {new Date(parsed.timestamp).toLocaleString()}
+          </Typography>
+        </Box>
+      </Box>
+    );
     
+    // Not a ThatsApp message, just show formatted JSON
     if (!parsed.type) {
-      // Not a ThatsApp message, just show formatted JSON with a toggle option
       return (
         <>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
@@ -92,203 +103,240 @@ const MessageContent = ({ message }: { message: string }) => {
         </>
       );
     }
-
-    // Common message metadata display
-    const MessageMeta = () => (
-      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Box sx={{ opacity: 0.7 }}>
-          <Typography variant="caption" sx={{ mr: 2 }}>
-            <strong>From:</strong> {parsed.senderId}
-          </Typography>
-          {parsed.recipientId && (
-            <Typography variant="caption" sx={{ mr: 2 }}>
-              <strong>To:</strong> {parsed.recipientId}
-            </Typography>
-          )}
-          <Typography variant="caption">
-            <strong>Time:</strong> {new Date(parsed.timestamp).toLocaleString()}
-          </Typography>
-        </Box>
-        <Button 
-          size="small" 
-          variant="text" 
-          onClick={() => setShowRawJson(true)}
-          sx={{ fontSize: '0.75rem', ml: 1 }}
-        >
-          View Raw JSON
-        </Button>
-      </Box>
-    );
-
-    // Render based on message type
-    switch (parsed.type.toString().toUpperCase()) {
-      case 'TEXT':
-        return (
-          <Box>
-            <MessageMeta />
-            <Box sx={{ p: 1.5, bgcolor: 'rgba(255, 255, 255, 0.05)', borderRadius: 1 }}>
-              <Typography>{parsed.payload}</Typography>
+    
+    // Generate the formatted content based on message type
+    const FormattedContent = () => {
+      switch (parsed.type.toString().toUpperCase()) {
+        case 'TEXT':
+          return (
+            <Box>
+              <MessageMeta />
+              <Box sx={{ p: 1.5, bgcolor: 'rgba(255, 255, 255, 0.05)', borderRadius: 1 }}>
+                <Typography>{parsed.payload}</Typography>
+              </Box>
             </Box>
-          </Box>
-        );
+          );
+          
+        case 'IMAGE':
+          return (
+            <Box>
+              <MessageMeta />
+              <Box sx={{ textAlign: 'center' }}>
+                <Box
+                  component="img"
+                  src={parsed.payload}
+                  alt="Image message"
+                  sx={{ 
+                    maxWidth: '100%', 
+                    maxHeight: '200px',
+                    borderRadius: 1,
+                    bgcolor: 'rgba(0, 0, 0, 0.1)'
+                  }}
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'https://via.placeholder.com/200x150?text=Error+loading+image';
+                  }}
+                />
+                <Typography variant="caption" display="block" sx={{ mt: 1 }}>
+                  {parsed.payload}
+                </Typography>
+              </Box>
+            </Box>
+          );
+          
+        case 'LOCATION':
+          let locationData = parsed.payload;
+          try {
+            if (typeof parsed.payload === 'string') {
+              locationData = JSON.parse(parsed.payload);
+            }
+          } catch (_) {
+            // Use as is if not JSON
+          }
+          
+          return (
+            <Box>
+              <MessageMeta />
+              <Box sx={{ textAlign: 'center' }}>
+                <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 1 }}>
+                  <Chip 
+                    label={`Latitude: ${locationData.latitude || 'N/A'}`} 
+                    size="small" 
+                    color="info"
+                  />
+                  <Chip 
+                    label={`Longitude: ${locationData.longitude || 'N/A'}`} 
+                    size="small" 
+                    color="info" 
+                  />
+                </Box>
+                <Typography variant="caption">
+                  {typeof parsed.payload === 'string' ? parsed.payload : JSON.stringify(parsed.payload)}
+                </Typography>
+              </Box>
+            </Box>
+          );
+          
+        case 'PROFILE_UPDATE':
+          let profileData = parsed.payload;
+          try {
+            if (typeof parsed.payload === 'string') {
+              profileData = JSON.parse(parsed.payload);
+            }
+          } catch (_) {
+            // Use as is if not JSON
+          }
+          
+          return (
+            <Box>
+              <MessageMeta />
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                {profileData.avatarUrl && (
+                  <Avatar 
+                    src={profileData.avatarUrl} 
+                    alt={profileData.name || 'Profile'}
+                    sx={{ width: 56, height: 56 }}
+                  />
+                )}
+                <Box>
+                  <Typography variant="subtitle1">{profileData.name || 'Unknown'}</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Profile updated
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+          );
         
-      case 'IMAGE':
-        return (
-          <Box>
-            <MessageMeta />
-            <Box sx={{ textAlign: 'center' }}>
-              <Box
-                component="img"
-                src={parsed.payload}
-                alt="Image message"
+        case 'TYPING':
+          return (
+            <Box>
+              <MessageMeta />
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <KeyboardIcon color="action" />
+                <Typography variant="body2" color="text.secondary">
+                  {parsed.senderId} is typing...
+                </Typography>
+              </Box>
+            </Box>
+          );
+          
+        case 'ONLINE_POLL':
+        case 'ONLINE_RESPONSE':
+          let onlineData = parsed.payload;
+          try {
+            if (typeof parsed.payload === 'string') {
+              onlineData = JSON.parse(parsed.payload);
+            }
+          } catch (_) {
+            // Use as is if not JSON
+          }
+          
+          return (
+            <Box>
+              <MessageMeta />
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                {onlineData.avatarUrl && (
+                  <Avatar 
+                    src={onlineData.avatarUrl} 
+                    alt={onlineData.name || parsed.senderId}
+                    sx={{ width: 40, height: 40 }}
+                  />
+                )}
+                <Box>
+                  <Typography variant="body2">
+                    {parsed.type === 'ONLINE_POLL' ? 'Checking who is online' : 'User is online'}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {onlineData.name || parsed.senderId}
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+          );
+        
+        default:
+          // Fallback for other message types
+          return (
+            <Box>
+              <MessageMeta />
+              <Box 
+                component="pre" 
                 sx={{ 
-                  maxWidth: '100%', 
-                  maxHeight: '200px',
-                  borderRadius: 1,
-                  bgcolor: 'rgba(0, 0, 0, 0.1)'
+                  fontSize: '0.85rem',
+                  fontFamily: 'monospace',
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
+                  margin: 0
                 }}
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = 'https://via.placeholder.com/200x150?text=Error+loading+image';
-                }}
-              />
-              <Typography variant="caption" display="block" sx={{ mt: 1 }}>
-                {parsed.payload}
-              </Typography>
-            </Box>
-          </Box>
-        );
-        
-      case 'LOCATION':
-        let locationData = parsed.payload;
-        try {
-          if (typeof parsed.payload === 'string') {
-            locationData = JSON.parse(parsed.payload);
-          }
-        } catch (_) {
-          // Use as is if not JSON
-        }
-        
-        return (
-          <Box>
-            <MessageMeta />
-            <Box sx={{ textAlign: 'center' }}>
-              <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 1 }}>
-                <Chip 
-                  label={`Latitude: ${locationData.latitude || 'N/A'}`} 
-                  size="small" 
-                  color="info"
-                />
-                <Chip 
-                  label={`Longitude: ${locationData.longitude || 'N/A'}`} 
-                  size="small" 
-                  color="info" 
-                />
-              </Box>
-              <Typography variant="caption">
-                {typeof parsed.payload === 'string' ? parsed.payload : JSON.stringify(parsed.payload)}
-              </Typography>
-            </Box>
-          </Box>
-        );
-        
-      case 'PROFILE_UPDATE':
-        let profileData = parsed.payload;
-        try {
-          if (typeof parsed.payload === 'string') {
-            profileData = JSON.parse(parsed.payload);
-          }
-        } catch (_) {
-          // Use as is if not JSON
-        }
-        
-        return (
-          <Box>
-            <MessageMeta />
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              {profileData.avatarUrl && (
-                <Avatar 
-                  src={profileData.avatarUrl} 
-                  alt={profileData.name || 'Profile'}
-                  sx={{ width: 56, height: 56 }}
-                />
-              )}
-              <Box>
-                <Typography variant="subtitle1">{profileData.name || 'Unknown'}</Typography>
-                <Typography variant="caption" color="text.secondary">
-                  Profile updated
-                </Typography>
+              >
+                {typeof parsed.payload === 'string' ? parsed.payload : JSON.stringify(parsed.payload, null, 2)}
               </Box>
             </Box>
-          </Box>
-        );
-      
-      case 'TYPING':
-        return (
-          <Box>
-            <MessageMeta />
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <KeyboardIcon color="action" />
-              <Typography variant="body2" color="text.secondary">
-                {parsed.senderId} is typing...
-              </Typography>
-            </Box>
-          </Box>
-        );
+          );
+      }
+    };
+    
+    // Render the toggle button and content with animation
+    return (
+      <>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
+          <Button 
+            size="small" 
+            variant="text" 
+            onClick={() => setShowRawJson(!showRawJson)}
+            sx={{ 
+              fontSize: '0.75rem',
+              color: 'primary.main',
+              '&:hover': {
+                backgroundColor: 'rgba(92, 107, 192, 0.12)'
+              }
+            }}
+          >
+            {showRawJson ? 'Show Formatted View' : 'View Raw JSON'}
+          </Button>
+        </Box>
         
-      case 'ONLINE_POLL':
-      case 'ONLINE_RESPONSE':
-        let onlineData = parsed.payload;
-        try {
-          if (typeof parsed.payload === 'string') {
-            onlineData = JSON.parse(parsed.payload);
-          }
-        } catch (_) {
-          // Use as is if not JSON
-        }
-        
-        return (
-          <Box>
-            <MessageMeta />
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              {onlineData.avatarUrl && (
-                <Avatar 
-                  src={onlineData.avatarUrl} 
-                  alt={onlineData.name || parsed.senderId}
-                  sx={{ width: 40, height: 40 }}
-                />
-              )}
-              <Box>
-                <Typography variant="body2">
-                  {parsed.type === 'ONLINE_POLL' ? 'Checking who is online' : 'User is online'}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {onlineData.name || parsed.senderId}
-                </Typography>
-              </Box>
-            </Box>
-          </Box>
-        );
-      
-      default:
-        // Fallback for other message types
-        return (
-          <Box>
-            <MessageMeta />
-            <Box 
-              component="pre" 
-              sx={{ 
-                fontSize: '0.85rem',
-                fontFamily: 'monospace',
-                whiteSpace: 'pre-wrap',
-                wordBreak: 'break-word',
-                margin: 0
-              }}
+        <AnimatePresence mode="wait" initial={false}>
+          {showRawJson ? (
+            <motion.div
+              key="raw-json"
+              variants={jsonViewVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
             >
-              {typeof parsed.payload === 'string' ? parsed.payload : JSON.stringify(parsed.payload, null, 2)}
-            </Box>
-          </Box>
-        );
-    }
+              <Box 
+                component="pre" 
+                sx={{ 
+                  fontSize: '0.85rem',
+                  fontFamily: 'monospace',
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
+                  margin: 0,
+                  bgcolor: 'rgba(0, 0, 0, 0.1)',
+                  p: 1.5,
+                  borderRadius: 1.5,
+                  border: '1px solid rgba(255, 255, 255, 0.05)',
+                  boxShadow: 'inset 0 1px 2px rgba(0, 0, 0, 0.1)'
+                }}
+              >
+                {JSON.stringify(parsed, null, 2)}
+              </Box>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="formatted-view"
+              variants={jsonViewVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+            >
+              <FormattedContent />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </>
+    );
   } catch (_) {
     // Fallback for parsing errors
     return (
@@ -309,6 +357,76 @@ const MessageContent = ({ message }: { message: string }) => {
 };
 
 // Define animations
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      duration: 0.3,
+      when: "beforeChildren",
+      delayChildren: 0.4 // Add a delay for the fourth component
+    }
+  }
+};
+
+const listVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { 
+      staggerChildren: 0.02,
+      when: "beforeChildren",
+      duration: 0.1
+    }
+  }
+};
+
+const messageVariants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: { 
+      type: "tween", 
+      duration: 0.2,
+      ease: "easeOut"
+    }
+  },
+  exit: { 
+    opacity: 0, 
+    scale: 0.98,
+    transition: { duration: 0.1 } 
+  }
+};
+
+// Custom animation for new messages
+const newMessageAnimationVariants = {
+  initial: {
+    borderLeft: '3px solid rgba(57, 73, 171, 0)',
+    backgroundColor: 'rgba(57, 73, 171, 0)'
+  },
+  animate: {
+    borderLeft: ['3px solid rgba(57, 73, 171, 0.4)', '3px solid rgba(57, 73, 171, 0)'],
+    backgroundColor: ['rgba(57, 73, 171, 0.03)', 'rgba(57, 73, 171, 0)'],
+    transition: {
+      duration: 0.8,
+      times: [0, 1],
+      ease: "easeOut"
+    }
+  }
+};
+
+const filterVariants = {
+  closed: { height: 0, opacity: 0 },
+  open: { 
+    height: "auto", 
+    opacity: 1,
+    transition: { 
+      height: { type: "spring", stiffness: 300, damping: 25 },
+      opacity: { duration: 0.2 }
+    }
+  }
+};
 
 export default function MessageViewer() {
   const { messages, clearMessages } = useMQTT();
@@ -582,78 +700,6 @@ export default function MessageViewer() {
       return null;
     } catch (_) {
       return null;
-    }
-  };
-
-  // Define Framer Motion variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        duration: 0.3,
-        when: "beforeChildren",
-        delayChildren: 0.4 // Add a delay for the fourth component
-      }
-    }
-  };
-
-  const listVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { 
-        staggerChildren: 0.02,
-        when: "beforeChildren",
-        duration: 0.1
-      }
-    }
-  };
-
-  const messageVariants = {
-    hidden: { opacity: 0, y: 10 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: { 
-        type: "tween", 
-        duration: 0.2,
-        ease: "easeOut"
-      }
-    },
-    exit: { 
-      opacity: 0, 
-      scale: 0.98,
-      transition: { duration: 0.1 } 
-    }
-  };
-  
-  // Custom animation for new messages
-  const newMessageAnimationVariants = {
-    initial: {
-      borderLeft: '3px solid rgba(57, 73, 171, 0)',
-      backgroundColor: 'rgba(57, 73, 171, 0)'
-    },
-    animate: {
-      borderLeft: ['3px solid rgba(57, 73, 171, 0.4)', '3px solid rgba(57, 73, 171, 0)'],
-      backgroundColor: ['rgba(57, 73, 171, 0.03)', 'rgba(57, 73, 171, 0)'],
-      transition: {
-        duration: 0.8,
-        times: [0, 1],
-        ease: "easeOut"
-      }
-    }
-  };
-
-  const filterVariants = {
-    closed: { height: 0, opacity: 0 },
-    open: { 
-      height: "auto", 
-      opacity: 1,
-      transition: { 
-        height: { type: "spring", stiffness: 300, damping: 25 },
-        opacity: { duration: 0.2 }
-      }
     }
   };
 
