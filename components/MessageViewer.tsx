@@ -34,41 +34,93 @@ import { useMQTT } from '../contexts/MQTTContext';
 
 // Component to display formatted message content based on message type
 const MessageContent = ({ message }: { message: string }) => {
+  const [showRawJson, setShowRawJson] = useState(false);
+  
   try {
     const parsed = JSON.parse(message);
     
-    if (!parsed.type) {
-      // Not a ThatsApp message, just show formatted JSON
+    // Raw JSON view toggle for all message types
+    if (showRawJson) {
       return (
-        <Box 
-          component="pre" 
-          sx={{ 
-            fontSize: '0.85rem',
-            fontFamily: 'monospace',
-            whiteSpace: 'pre-wrap',
-            wordBreak: 'break-word',
-            margin: 0
-          }}
-        >
-          {JSON.stringify(parsed, null, 2)}
-        </Box>
+        <>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
+            <Button 
+              size="small" 
+              variant="text" 
+              onClick={() => setShowRawJson(false)}
+              sx={{ fontSize: '0.75rem' }}
+            >
+              Show Formatted View
+            </Button>
+          </Box>
+          <Box 
+            component="pre" 
+            sx={{ 
+              fontSize: '0.85rem',
+              fontFamily: 'monospace',
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-word',
+              margin: 0,
+              bgcolor: 'rgba(0, 0, 0, 0.1)',
+              p: 1,
+              borderRadius: 1
+            }}
+          >
+            {JSON.stringify(parsed, null, 2)}
+          </Box>
+        </>
+      );
+    }
+    
+    if (!parsed.type) {
+      // Not a ThatsApp message, just show formatted JSON with a toggle option
+      return (
+        <>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ mr: 'auto' }}>
+              Generic JSON Message
+            </Typography>
+          </Box>
+          <Box 
+            component="pre" 
+            sx={{ 
+              fontSize: '0.85rem',
+              fontFamily: 'monospace',
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-word',
+              margin: 0
+            }}
+          >
+            {JSON.stringify(parsed, null, 2)}
+          </Box>
+        </>
       );
     }
 
     // Common message metadata display
     const MessageMeta = () => (
-      <Box sx={{ mb: 2, opacity: 0.7 }}>
-        <Typography variant="caption" sx={{ mr: 2 }}>
-          <strong>From:</strong> {parsed.senderId}
-        </Typography>
-        {parsed.recipientId && (
+      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box sx={{ opacity: 0.7 }}>
           <Typography variant="caption" sx={{ mr: 2 }}>
-            <strong>To:</strong> {parsed.recipientId}
+            <strong>From:</strong> {parsed.senderId}
           </Typography>
-        )}
-        <Typography variant="caption">
-          <strong>Time:</strong> {new Date(parsed.timestamp).toLocaleString()}
-        </Typography>
+          {parsed.recipientId && (
+            <Typography variant="caption" sx={{ mr: 2 }}>
+              <strong>To:</strong> {parsed.recipientId}
+            </Typography>
+          )}
+          <Typography variant="caption">
+            <strong>Time:</strong> {new Date(parsed.timestamp).toLocaleString()}
+          </Typography>
+        </Box>
+        <Button 
+          size="small" 
+          variant="text" 
+          onClick={() => setShowRawJson(true)}
+          sx={{ fontSize: '0.75rem', ml: 1 }}
+        >
+          View Raw JSON
+        </Button>
       </Box>
     );
 
