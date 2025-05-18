@@ -198,7 +198,7 @@ export const MQTTProvider: React.FC<MQTTProviderProps> = ({ children }) => {
       try {
         const mqttMessage = new pahoMqtt.Message(message);
         mqttMessage.destinationName = topic;
-        mqttMessage.retained = retained;
+        mqttMessage.retained = false; // Always set retained to false
         client.send(mqttMessage);
       } catch (e) {
         console.error(`Error publishing to ${topic}:`, e);

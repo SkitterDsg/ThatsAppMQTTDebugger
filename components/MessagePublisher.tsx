@@ -37,7 +37,6 @@ export default function MessagePublisher() {
   const [messageType, setMessageType] = useState('text');
   const [senderId, setSenderId] = useState('debugger');
   const [recipientId, setRecipientId] = useState('recipient');
-  const [retained, setRetained] = useState(false);
 
   const createTemplateMessage = () => {
     let templateMessage: ThatsAppMessage;
@@ -87,13 +86,13 @@ export default function MessagePublisher() {
           // Validate JSON
           JSON.parse(message);
           setJsonError('');
-          publish(topic, message, retained);
+          publish(topic, message);
         } catch (_) {
           setJsonError('Invalid JSON format');
           return;
         }
       } else {
-        publish(topic, message, retained);
+        publish(topic, message);
       }
     }
   };
@@ -262,40 +261,22 @@ export default function MessagePublisher() {
             variants={itemVariants}
             sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
           >
-            <Stack direction="row" spacing={2}>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={isJsonMessage}
-                    onChange={(e) => setIsJsonMessage(e.target.checked)}
-                    color="primary"
-                    size="small"
-                  />
-                }
-                label={
-                  <Typography variant="body2" sx={{ fontSize: '0.85rem', ml: 0.5 }}>
-                    Format as JSON
-                  </Typography>
-                }
-                sx={{ my: 0 }}
-              />
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={retained}
-                    onChange={(e) => setRetained(e.target.checked)}
-                    color="warning"
-                    size="small"
-                  />
-                }
-                label={
-                  <Typography variant="body2" sx={{ fontSize: '0.85rem', ml: 0.5 }}>
-                    Retained
-                  </Typography>
-                }
-                sx={{ my: 0 }}
-              />
-            </Stack>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={isJsonMessage}
+                  onChange={(e) => setIsJsonMessage(e.target.checked)}
+                  color="primary"
+                  size="small"
+                />
+              }
+              label={
+                <Typography variant="body2" sx={{ fontSize: '0.85rem', ml: 0.5 }}>
+                  Format as JSON
+                </Typography>
+              }
+              sx={{ my: 0 }}
+            />
           </Box>
 
           <AnimatePresence>
