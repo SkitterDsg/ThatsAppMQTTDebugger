@@ -9,6 +9,7 @@ const ConnectionForm = dynamic(() => import('../components/ConnectionForm'), { s
 const TopicSubscriber = dynamic(() => import('../components/TopicSubscriber'), { ssr: false });
 const MessagePublisher = dynamic(() => import('../components/MessagePublisher'), { ssr: false });
 const MessageViewer = dynamic(() => import('../components/MessageViewer'), { ssr: false });
+const MessageTypesGuide = dynamic(() => import('../components/MessageTypesGuide'), { ssr: false });
 
 export default function Home() {
   const { isConnected, subscribe } = useMQTT();
@@ -35,6 +36,7 @@ export default function Home() {
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
               ThatsApp MQTT Debugger
             </Typography>
+            <MessageTypesGuide />
           </Toolbar>
         </AppBar>
 
