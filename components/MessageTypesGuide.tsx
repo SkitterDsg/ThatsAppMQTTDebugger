@@ -12,8 +12,12 @@ import {
   Chip,
   Stack,
   Alert,
-  Fade
+  Fade,
+  Collapse,
+  Tooltip
 } from '@mui/material';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import CodeIcon from '@mui/icons-material/Code';
 import CloseIcon from '@mui/icons-material/Close';
 import InfoIcon from '@mui/icons-material/Info';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
@@ -74,6 +78,88 @@ const CodeBlock = ({ children }: { children: React.ReactNode }) => (
     {children}
   </Box>
 );
+
+interface CodeExampleBoxProps {
+  messageType: string;
+  codeExample: string; 
+  description?: string;
+}
+
+const CodeExampleBox = ({ messageType, codeExample, description }: CodeExampleBoxProps) => {
+  const [showCode, setShowCode] = useState(false);
+  
+  const handleCopy = () => {
+    navigator.clipboard.writeText(codeExample);
+  };
+  
+  return (
+    <Box sx={{ mt: 1 }}>
+      <Button
+        size="small"
+        startIcon={<CodeIcon />}
+        variant="outlined"
+        onClick={() => setShowCode(!showCode)}
+        sx={{ 
+          textTransform: 'none', 
+          borderColor: 'rgba(255,255,255,0.2)',
+          mr: 1
+        }}
+      >
+        {showCode ? 'Hide Example' : 'View Example Code'}
+      </Button>
+      
+      {description && (
+        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+          {description}
+        </Typography>
+      )}
+      
+      <Collapse in={showCode}>
+        <Box 
+          sx={{ 
+            position: 'relative', 
+            mt: 1.5,
+            border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: 1
+          }}
+        >
+          <Box 
+            sx={{ 
+              p: 1, 
+              backgroundColor: 'rgba(0,0,0,0.3)', 
+              borderBottom: '1px solid rgba(255,255,255,0.1)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}
+          >
+            <Typography variant="caption" sx={{ fontWeight: 500 }}>
+              {messageType} Example
+            </Typography>
+            <Tooltip title="Copy to clipboard">
+              <IconButton size="small" onClick={handleCopy}>
+                <ContentCopyIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Box>
+          <Box
+            component="pre"
+            sx={{
+              m: 0,
+              p: 2,
+              overflow: 'auto',
+              fontSize: '0.85rem',
+              fontFamily: 'monospace',
+              backgroundColor: 'rgba(0, 0, 0, 0.2)',
+            }}
+          >
+            {codeExample}
+          </Box>
+        </Box>
+      </Collapse>
+    </Box>
+  );
+};
 
 export default function MessageTypesGuide() {
   const [open, setOpen] = useState(false);
@@ -179,6 +265,17 @@ export default function MessageTypesGuide() {
                     variant="outlined" 
                     sx={{ mt: 1 }} 
                   />
+                  <CodeExampleBox 
+                    messageType="TEXT"
+                    description="Send a text message to a specific user"
+                    codeExample={`{
+  "senderId": "user123",
+  "recipientId": "user456",
+  "timestamp": ${Date.now()},
+  "type": "TEXT",
+  "payload": "Hello, how are you today?"
+}`}
+                  />
                 </Paper>
                 
                 <Paper variant="outlined" sx={{ p: 2 }}>
@@ -196,6 +293,17 @@ export default function MessageTypesGuide() {
                     variant="outlined" 
                     sx={{ mt: 1 }} 
                   />
+                  <CodeExampleBox 
+                    messageType="IMAGE"
+                    description="Send an image URL to a specific user"
+                    codeExample={`{
+  "senderId": "user123",
+  "recipientId": "user456",
+  "timestamp": ${Date.now()},
+  "type": "IMAGE",
+  "payload": "https://example.com/images/photo.jpg"
+}`}
+                  />
                 </Paper>
                 
                 <Paper variant="outlined" sx={{ p: 2 }}>
@@ -212,6 +320,17 @@ export default function MessageTypesGuide() {
                     color="primary" 
                     variant="outlined" 
                     sx={{ mt: 1 }} 
+                  />
+                  <CodeExampleBox 
+                    messageType="LOCATION"
+                    description="Share a location with a specific user"
+                    codeExample={`{
+  "senderId": "user123",
+  "recipientId": "user456",
+  "timestamp": ${Date.now()},
+  "type": "LOCATION",
+  "payload": "{\\"latitude\\":47.3769,\\"longitude\\":8.5417}"
+}`}
                   />
                 </Paper>
                 
@@ -237,6 +356,27 @@ export default function MessageTypesGuide() {
                       variant="outlined" 
                     />
                   </Stack>
+                  <CodeExampleBox 
+                    messageType="PROFILE_UPDATE"
+                    description="Update your profile information (can be sent directly or globally)"
+                    codeExample={`// Direct profile update
+{
+  "senderId": "user123",
+  "recipientId": "user456",
+  "timestamp": ${Date.now()},
+  "type": "PROFILE_UPDATE",
+  "payload": "{\\"name\\":\\"John Doe\\",\\"avatarUrl\\":\\"https://example.com/avatar.jpg\\"}"
+}
+
+// Global profile update
+{
+  "senderId": "user123",
+  "recipientId": "global",
+  "timestamp": ${Date.now()},
+  "type": "PROFILE_UPDATE",
+  "payload": "{\\"name\\":\\"John Doe\\",\\"avatarUrl\\":\\"https://example.com/avatar.jpg\\"}"
+}`}
+                  />
                 </Paper>
                 
                 <Paper variant="outlined" sx={{ p: 2 }}>
@@ -261,6 +401,27 @@ export default function MessageTypesGuide() {
                       variant="outlined" 
                     />
                   </Stack>
+                  <CodeExampleBox 
+                    messageType="REQUEST_PROFILE"
+                    description="Request a user's profile information (direct or global)"
+                    codeExample={`// Direct profile request
+{
+  "senderId": "user123",
+  "recipientId": "user456",
+  "timestamp": ${Date.now()},
+  "type": "REQUEST_PROFILE",
+  "payload": ""
+}
+
+// Global profile request
+{
+  "senderId": "user123",
+  "recipientId": "global",
+  "timestamp": ${Date.now()},
+  "type": "REQUEST_PROFILE",
+  "payload": ""
+}`}
+                  />
                 </Paper>
                 
                 <Paper variant="outlined" sx={{ p: 2 }}>
@@ -277,6 +438,17 @@ export default function MessageTypesGuide() {
                     color="primary" 
                     variant="outlined" 
                     sx={{ mt: 1 }} 
+                  />
+                  <CodeExampleBox 
+                    messageType="TYPING"
+                    description="Indicate that you are typing to a specific user"
+                    codeExample={`{
+  "senderId": "user123",
+  "recipientId": "user456",
+  "timestamp": ${Date.now()},
+  "type": "TYPING",
+  "payload": ""
+}`}
                   />
                 </Paper>
                 
@@ -295,6 +467,17 @@ export default function MessageTypesGuide() {
                     variant="outlined" 
                     sx={{ mt: 1 }} 
                   />
+                  <CodeExampleBox 
+                    messageType="ONLINE_POLL"
+                    description="Check who is currently online"
+                    codeExample={`{
+  "senderId": "user123",
+  "recipientId": "global",
+  "timestamp": ${Date.now()},
+  "type": "ONLINE_POLL",
+  "payload": "{\\"name\\":\\"John Doe\\",\\"avatarUrl\\":\\"https://example.com/avatar.jpg\\"}"
+}`}
+                  />
                 </Paper>
                 
                 <Paper variant="outlined" sx={{ p: 2 }}>
@@ -311,6 +494,17 @@ export default function MessageTypesGuide() {
                     color="warning" 
                     variant="outlined" 
                     sx={{ mt: 1 }} 
+                  />
+                  <CodeExampleBox 
+                    messageType="ONLINE_RESPONSE"
+                    description="Respond to an online poll indicating you are online"
+                    codeExample={`{
+  "senderId": "user123",
+  "recipientId": "global",
+  "timestamp": ${Date.now()},
+  "type": "ONLINE_RESPONSE",
+  "payload": "{\\"name\\":\\"John Doe\\",\\"avatarUrl\\":\\"https://example.com/avatar.jpg\\"}"
+}`}
                   />
                 </Paper>
               </Stack>
