@@ -358,6 +358,17 @@ The debugger supports all ThatsApp message types:
 - Your MQTT connection details and messages are not saved between sessions
 - When using the tool on an HTTPS page, it will automatically upgrade insecure WebSocket connections to secure ones (WSS)
 
+## 🚨 Error Handling
+
+The debugger includes comprehensive error handling to help identify and resolve issues:
+
+- **Connection Errors**: Detailed error messages when connection fails, including broker URL validation
+- **Operation Errors**: Clear notifications about failures in subscriptions, publications, and message processing
+- **Input Validation**: Safeguards against empty topics, malformed messages, and invalid JSON
+- **Persistent Connection**: Automatic reconnection attempts when connections drop unexpectedly
+- **Visual Indicators**: Error messages are displayed prominently to help users identify and fix problems
+- **WebSocket Security**: Automatic protocol upgrade from ws:// to wss:// when using HTTPS
+
 ## 📄 License
 
 This project is licensed under the ISC License.

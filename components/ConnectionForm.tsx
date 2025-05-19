@@ -1,14 +1,21 @@
-import { useState } from 'react';
-import { TextField, Button, Box, Typography, Paper, Stack, FormHelperText } from '@mui/material';
+import { useState, useEffect } from 'react';
+import { TextField, Button, Box, Typography, Paper, Stack, FormHelperText, Alert } from '@mui/material';
 import { useMQTT } from '../contexts/MQTTContext';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function ConnectionForm() {
-  const { connect, disconnect, isConnected } = useMQTT();
+  const { connect, disconnect, isConnected, errorMessage, clearError } = useMQTT();
   const [broker, setBroker] = useState(typeof window !== 'undefined' && window.location.protocol === 'https:' 
     ? 'wss://broker.hivemq.com:8884/mqtt' 
     : 'ws://broker.hivemq.com:8000/mqtt');
   const [clientId, setClientId] = useState(`thatsapp-debugger-${Math.random().toString(16).substring(2, 8)}`);
+  
+  // Clear error when component unmounts
+  useEffect(() => {
+    return () => {
+      clearError();
+    };
+  }, [clearError]);
 
   const handleConnect = () => {
     connect(broker, {
@@ -98,6 +105,31 @@ export default function ConnectionForm() {
             MQTT Connection
           </Typography>
         </motion.div>
+        <AnimatePresence>
+          {errorMessage && (
+            <motion.div
+              initial={{ opacity: 0, y: -10, height: 0 }}
+              animate={{ opacity: 1, y: 0, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              style={{ overflow: 'hidden', width: '100%', marginBottom: '16px' }}
+            >
+              <Alert 
+                severity="error" 
+                onClose={clearError}
+                sx={{ 
+                  borderRadius: 1.5, 
+                  '& .MuiAlert-message': { 
+                    fontWeight: 500 
+                  } 
+                }}
+              >
+                {errorMessage}
+              </Alert>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        
         <Stack 
           component={motion.div}
           variants={itemVariants}

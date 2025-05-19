@@ -15,12 +15,14 @@ interface MQTTContextType {
   isConnected: boolean;
   messages: Message[];
   subscribedTopics: string[];
+  errorMessage: string;
   connect: (brokerUrl: string, options?: any) => void;
   disconnect: () => void;
   subscribe: (topic: string) => void;
   unsubscribe: (topic: string) => void;
   publish: (topic: string, message: string, retained?: boolean) => void;
   clearMessages: () => void;
+  clearError: () => void;
 }
 
 export const MQTTContext = createContext<MQTTContextType>({
@@ -28,12 +30,14 @@ export const MQTTContext = createContext<MQTTContextType>({
   isConnected: false,
   messages: [],
   subscribedTopics: [],
+  errorMessage: "",
   connect: () => {},
   disconnect: () => {},
   subscribe: () => {},
   unsubscribe: () => {},
   publish: () => {},
   clearMessages: () => {},
+  clearError: () => {},
 });
 
 interface MQTTProviderProps {
@@ -46,6 +50,7 @@ export const MQTTProvider: React.FC<MQTTProviderProps> = ({ children }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [subscribedTopics, setSubscribedTopics] = useState<string[]>([]);
   const [pahoMqtt, setPahoMqtt] = useState<any>(null);
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
   // Load Paho MQTT client on client side only
   useEffect(() => {
@@ -77,13 +82,23 @@ export const MQTTProvider: React.FC<MQTTProviderProps> = ({ children }) => {
   }, [client]);
 
   const connect = (brokerUrl: string, options?: any) => {
+    // Clear any previous errors
+    setErrorMessage("");
+    
     if (typeof window === 'undefined' || !pahoMqtt) {
+      setErrorMessage("MQTT client not initialized. Please reload the page.");
       return; // Do nothing during SSR or if Paho not loaded
     }
 
     try {
       // Parse URL to extract host, port, and path
-      let url = new URL(brokerUrl);
+      let url: URL;
+      try {
+        url = new URL(brokerUrl);
+      } catch (error) {
+        setErrorMessage("Invalid broker URL. Please enter a valid URL.");
+        return;
+      }
       
       // Check if we need to force WSS based on page protocol
       if (window.location.protocol === 'https:' && url.protocol === 'ws:') {
@@ -111,6 +126,7 @@ export const MQTTProvider: React.FC<MQTTProviderProps> = ({ children }) => {
       mqttClient.onConnectionLost = (responseObject) => {
         console.log("MQTT connection lost:", responseObject.errorMessage);
         setIsConnected(false);
+        setErrorMessage(`Connection lost: ${responseObject.errorMessage}`);
       };
       
       mqttClient.onMessageArrived = (message) => {
@@ -137,10 +153,12 @@ export const MQTTProvider: React.FC<MQTTProviderProps> = ({ children }) => {
           console.log('Connected to MQTT broker');
           setIsConnected(true);
           setClient(mqttClient);
+          setErrorMessage("");
         },
         onFailure: (error) => {
           console.error('MQTT connection failed:', error.errorMessage);
           setIsConnected(false);
+          setErrorMessage(`Connection failed: ${error.errorMessage}`);
         },
         useSSL: url.protocol === 'wss:',
         reconnect: true,
@@ -149,16 +167,19 @@ export const MQTTProvider: React.FC<MQTTProviderProps> = ({ children }) => {
       
     } catch (error) {
       console.error('Failed to connect to MQTT broker:', error);
+      setErrorMessage(`Connection error: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
 
   const disconnect = () => {
+    setErrorMessage("");
     if (client && isConnected) {
       try {
         client.disconnect();
         console.log('Disconnected from MQTT broker');
       } catch (e) {
         console.error('Error disconnecting from MQTT broker:', e);
+        setErrorMessage(`Error disconnecting: ${e instanceof Error ? e.message : String(e)}`);
       }
       setClient(null);
       setIsConnected(false);
@@ -168,6 +189,12 @@ export const MQTTProvider: React.FC<MQTTProviderProps> = ({ children }) => {
   };
 
   const subscribe = (topic: string) => {
+    setErrorMessage("");
+    if (!topic || !topic.trim()) {
+      setErrorMessage("Topic cannot be empty");
+      return;
+    }
+    
     if (client && isConnected) {
       try {
         client.subscribe(topic);
@@ -176,11 +203,15 @@ export const MQTTProvider: React.FC<MQTTProviderProps> = ({ children }) => {
         );
       } catch (e) {
         console.error(`Error subscribing to ${topic}:`, e);
+        setErrorMessage(`Error subscribing to ${topic}: ${e instanceof Error ? e.message : String(e)}`);
       }
+    } else {
+      setErrorMessage("Not connected to MQTT broker");
     }
   };
 
   const unsubscribe = (topic: string) => {
+    setErrorMessage("");
     if (client && isConnected) {
       try {
         client.unsubscribe(topic);
@@ -189,25 +220,44 @@ export const MQTTProvider: React.FC<MQTTProviderProps> = ({ children }) => {
         );
       } catch (e) {
         console.error(`Error unsubscribing from ${topic}:`, e);
+        setErrorMessage(`Error unsubscribing from ${topic}: ${e instanceof Error ? e.message : String(e)}`);
       }
     }
   };
 
   const publish = (topic: string, message: string, retained: boolean = false) => {
+    setErrorMessage("");
+    if (!topic || !topic.trim()) {
+      setErrorMessage("Topic cannot be empty");
+      return;
+    }
+    
+    if (!message || !message.trim()) {
+      setErrorMessage("Message cannot be empty");
+      return;
+    }
+    
     if (client && isConnected && pahoMqtt) {
       try {
         const mqttMessage = new pahoMqtt.Message(message);
         mqttMessage.destinationName = topic;
-        mqttMessage.retained = false; // Always set retained to false
+        mqttMessage.retained = retained; // Use the parameter value
         client.send(mqttMessage);
       } catch (e) {
         console.error(`Error publishing to ${topic}:`, e);
+        setErrorMessage(`Error publishing to ${topic}: ${e instanceof Error ? e.message : String(e)}`);
       }
+    } else {
+      setErrorMessage("Not connected to MQTT broker");
     }
   };
 
   const clearMessages = () => {
     setMessages([]);
+  };
+  
+  const clearError = () => {
+    setErrorMessage("");
   };
 
   return (
@@ -217,12 +267,14 @@ export const MQTTProvider: React.FC<MQTTProviderProps> = ({ children }) => {
         isConnected,
         messages,
         subscribedTopics,
+        errorMessage,
         connect,
         disconnect,
         subscribe,
         unsubscribe,
         publish,
         clearMessages,
+        clearError,
       }}
     >
       {children}
